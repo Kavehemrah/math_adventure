@@ -289,121 +289,137 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Widget buildHome() {
+    // Keep the main actions visible on typical phone screens.
+    final compact = MediaQuery.sizeOf(context).height < 760;
+
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(height: 25),
+        SizedBox(height: compact ? 4 : 12),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 12),
+          padding: EdgeInsets.symmetric(
+            vertical: compact ? 10 : 16,
+            horizontal: 12,
+          ),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFF2D145F), Color(0xFF6846D8), Color(0xFFB18CFF)],
+              colors: [
+                Color(0xFF2D145F),
+                Color(0xFF6846D8),
+                Color(0xFFB18CFF),
+              ],
               begin: Alignment.bottomLeft,
               end: Alignment.topRight,
             ),
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(26),
           ),
-          child: const Column(
-            children: [
-              Text('✨  🌙  ✨', style: TextStyle(fontSize: 22)),
-              SizedBox(height: 8),
-              Text('🏰', style: TextStyle(fontSize: 82)),
-              Text('🐉  🪄  🐲', style: TextStyle(fontSize: 32)),
-              SizedBox(height: 8),
-              Text(
-                'سرزمین جادو',
-                style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        const Text(
-          'جادوگران ریاضی',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.w900,
-            color: Color(0xFF39246B),
-          ),
-        ),
-        const SizedBox(height: 12),
-        const Text(
-          'فکر کن، جواب بده و قهرمان شو!',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18, color: Colors.black54),
-        ),
-        const SizedBox(height: 28),
-        Container(
-          padding: const EdgeInsets.all(22),
-          decoration: cardDecoration(),
           child: Column(
             children: [
-              const Text('🎯', style: TextStyle(fontSize: 42)),
-              const SizedBox(height: 10),
+              Text('✨  🌙  ✨', style: TextStyle(fontSize: compact ? 17 : 20)),
+              SizedBox(height: compact ? 2 : 5),
+              Text('🏰', style: TextStyle(fontSize: compact ? 58 : 70)),
+              Text('🐉  🪄  🐲', style: TextStyle(fontSize: compact ? 25 : 29)),
+              SizedBox(height: compact ? 2 : 5),
               const Text(
-                'آماده‌ای قهرمان؟',
-                style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 14),
-              const Text(
-                'به سؤال‌ها جواب بده، امتیاز جمع کن و مرحله‌های سخت‌تر را باز کن.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, height: 1.8),
-              ),
-              const SizedBox(height: 18),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.emoji_events, color: Colors.amber, size: 30),
-                  const SizedBox(width: 8),
-                  Text(
-                    'بهترین امتیاز: ${fa('$bestScore')}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 58,
-                child: ElevatedButton.icon(
-                  onPressed: startGame,
-                  icon: const Icon(Icons.play_arrow_rounded, size: 30),
-                  label: const Text(
-                    'شروع بازی',
-                    style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
-                  ),
-                  style: primaryButtonStyle(),
+                'سرزمین جادو',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 14),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: () => setState(() => showMap = true),
-            icon: const Icon(Icons.map_rounded),
-            label: const Text('نقشه سرزمین جادو', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF6846D8),
-              padding: const EdgeInsets.symmetric(vertical: 15),
-              side: const BorderSide(color: Color(0xFF6846D8), width: 1.5),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            ),
+        SizedBox(height: compact ? 8 : 12),
+        Text(
+          'جادوگران ریاضی',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: compact ? 27 : 31,
+            fontWeight: FontWeight.w900,
+            color: const Color(0xFF39246B),
           ),
         ),
-        const SizedBox(height: 20),
-        const Text(
+        SizedBox(height: compact ? 3 : 7),
+        Text(
+          'فکر کن، جواب بده و قهرمان شو!',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: compact ? 15 : 17,
+            color: Colors.black54,
+          ),
+        ),
+        SizedBox(height: compact ? 12 : 18),
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(compact ? 14 : 18),
+          decoration: cardDecoration(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.emoji_events, color: Colors.amber, size: 27),
+                  const SizedBox(width: 7),
+                  Text(
+                    'بهترین امتیاز: ${fa('$bestScore')}',
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: compact ? 10 : 15),
+              SizedBox(
+                width: double.infinity,
+                height: compact ? 50 : 56,
+                child: ElevatedButton.icon(
+                  onPressed: startGame,
+                  icon: const Icon(Icons.play_arrow_rounded, size: 28),
+                  label: const Text(
+                    'شروع بازی',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  style: primaryButtonStyle(),
+                ),
+              ),
+              SizedBox(height: compact ? 8 : 11),
+              SizedBox(
+                width: double.infinity,
+                height: compact ? 46 : 50,
+                child: OutlinedButton.icon(
+                  onPressed: () => setState(() => showMap = true),
+                  icon: const Icon(Icons.map_rounded),
+                  label: const Text(
+                    'نقشه سرزمین جادو',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF6846D8),
+                    side: const BorderSide(
+                      color: Color(0xFF6846D8),
+                      width: 1.5,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: compact ? 8 : 14),
+        Text(
           '➕ جمع   ➖ تفریق   ✖️ ضرب   ➗ تقسیم',
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16),
+          style: TextStyle(fontSize: compact ? 13 : 15),
         ),
+        SizedBox(height: compact ? 2 : 8),
       ],
     );
   }
