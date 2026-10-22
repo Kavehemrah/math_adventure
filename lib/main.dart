@@ -26,7 +26,7 @@ class MathAdventureApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'ماجراجویی ریاضی',
+      title: 'جادوگران ریاضی',
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: const Color(0xFF6846D8),
@@ -52,6 +52,7 @@ class _GameScreenState extends State<GameScreen> {
 
   Timer? timer;
   int bestScore = 0;
+  int unlockedLevel = 1;
   int score = 0;
   int level = 1;
   int lives = 3;
@@ -66,6 +67,7 @@ class _GameScreenState extends State<GameScreen> {
 
   bool answered = false;
   bool gameStarted = false;
+  bool showMap = false;
   bool gameOver = false;
   bool timedOut = false;
 
@@ -80,6 +82,7 @@ class _GameScreenState extends State<GameScreen> {
     if (!mounted) return;
     setState(() {
       bestScore = prefs.getInt('best_score') ?? 0;
+      unlockedLevel = max(1, prefs.getInt('unlocked_level') ?? 1);
     });
   }
 
@@ -90,14 +93,20 @@ class _GameScreenState extends State<GameScreen> {
     await prefs.setInt('best_score', bestScore);
   }
 
-  void startGame() {
+  Future<void> saveUnlockedLevel() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('unlocked_level', unlockedLevel);
+  }
+
+  void startGame({int? startingLevel}) {
     timer?.cancel();
     setState(() {
       score = 0;
-      level = 1;
+      level = startingLevel ?? 1;
       lives = 3;
       questionInLevel = 0;
       gameStarted = true;
+      showMap = false;
       gameOver = false;
       createQuestion();
     });
@@ -209,6 +218,10 @@ class _GameScreenState extends State<GameScreen> {
 
         if (questionInLevel >= 5) {
           level++;
+          if (level > unlockedLevel) {
+            unlockedLevel = level;
+            saveUnlockedLevel();
+          }
           questionInLevel = 0;
         }
       } else {
@@ -241,6 +254,7 @@ class _GameScreenState extends State<GameScreen> {
     timer?.cancel();
     setState(() {
       gameStarted = false;
+      showMap = false;
       gameOver = false;
     });
   }
@@ -262,9 +276,11 @@ class _GameScreenState extends State<GameScreen> {
               constraints: const BoxConstraints(maxWidth: 480),
               child: gameOver
                   ? buildGameOver()
-                  : !gameStarted
-                      ? buildHome()
-                      : buildGame(),
+                  : showMap
+                      ? buildLevelMap()
+                      : !gameStarted
+                          ? buildHome()
+                          : buildGame(),
             ),
           ),
         ),
@@ -276,10 +292,34 @@ class _GameScreenState extends State<GameScreen> {
     return Column(
       children: [
         const SizedBox(height: 25),
-        const Text('🚀', style: TextStyle(fontSize: 82)),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 12),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF2D145F), Color(0xFF6846D8), Color(0xFFB18CFF)],
+              begin: Alignment.bottomLeft,
+              end: Alignment.topRight,
+            ),
+            borderRadius: BorderRadius.circular(30),
+          ),
+          child: const Column(
+            children: [
+              Text('✨  🌙  ✨', style: TextStyle(fontSize: 22)),
+              SizedBox(height: 8),
+              Text('🏰', style: TextStyle(fontSize: 82)),
+              Text('🐉  🪄  🐲', style: TextStyle(fontSize: 32)),
+              SizedBox(height: 8),
+              Text(
+                'سرزمین جادو',
+                style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
         const SizedBox(height: 12),
         const Text(
-          'ماجراجویی ریاضی',
+          'جادوگران ریاضی',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 32,
@@ -343,11 +383,115 @@ class _GameScreenState extends State<GameScreen> {
             ],
           ),
         ),
+        const SizedBox(height: 14),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () => setState(() => showMap = true),
+            icon: const Icon(Icons.map_rounded),
+            label: const Text('نقشه سرزمین جادو', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFF6846D8),
+              padding: const EdgeInsets.symmetric(vertical: 15),
+              side: const BorderSide(color: Color(0xFF6846D8), width: 1.5),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+          ),
+        ),
         const SizedBox(height: 20),
         const Text(
           '➕ جمع   ➖ تفریق   ✖️ ضرب   ➗ تقسیم',
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 16),
+        ),
+      ],
+    );
+  }
+
+  Widget buildLevelMap() {
+    return Column(
+      children: [
+        const Text('🗺️', style: TextStyle(fontSize: 62)),
+        const SizedBox(height: 8),
+        const Text(
+          'نقشه سرزمین جادو',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Color(0xFF39246B)),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'مرحله‌های بازشده: ${fa('$unlockedLevel')} از ۱۰',
+          style: const TextStyle(fontSize: 16, color: Colors.black54),
+        ),
+        const SizedBox(height: 20),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: cardDecoration(),
+          child: Column(
+            children: List.generate(10, (index) {
+              final stage = index + 1;
+              final isUnlocked = stage <= unlockedLevel;
+              final isCurrent = stage == unlockedLevel;
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: Material(
+                  color: isUnlocked
+                      ? (isCurrent ? const Color(0xFFE3D8FF) : const Color(0xFFF3EEFF))
+                      : const Color(0xFFF1F1F5),
+                  borderRadius: BorderRadius.circular(16),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: isUnlocked ? () => startGame(startingLevel: stage) : null,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: isUnlocked ? const Color(0xFF6846D8) : Colors.grey.shade400,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Icon(
+                              isUnlocked ? (stage == 1 ? Icons.castle_rounded : Icons.auto_awesome) : Icons.lock_rounded,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('مرحله ${fa('$stage')}', style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+                                Text(
+                                  isCurrent ? 'آخرین مرحله بازشده' : isUnlocked ? 'آماده ماجراجویی' : 'با پیشرفت در بازی باز می‌شود',
+                                  style: const TextStyle(fontSize: 12, color: Colors.black54),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(isUnlocked ? Icons.play_circle_fill_rounded : Icons.lock_outline, color: isUnlocked ? const Color(0xFF6846D8) : Colors.grey),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: ElevatedButton.icon(
+            onPressed: () => setState(() => showMap = false),
+            icon: const Icon(Icons.home_rounded),
+            label: const Text('بازگشت به خانه'),
+            style: primaryButtonStyle(),
+          ),
         ),
       ],
     );
