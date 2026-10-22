@@ -561,13 +561,18 @@ class _GameScreenState extends State<GameScreen> {
               const SizedBox(height: 28),
               const Text('🧠', style: TextStyle(fontSize: 46)),
               const SizedBox(height: 10),
-              Text(
-                question,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFF39246B),
+              Directionality(
+                // Arithmetic expressions must always be laid out left to right,
+                // even though the surrounding game UI is Persian/RTL.
+                textDirection: TextDirection.ltr,
+                child: Text(
+                  question,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 36,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF39246B),
+                  ),
                 ),
               ),
               const SizedBox(height: 28),
