@@ -58,7 +58,7 @@ class _GameScreenState extends State<GameScreen> {
   int score = 0;
   int level = 1;
   int lives = 3;
-  int timeLeft = 25;
+  int timeLeft = 40;
   int questionInLevel = 0;
   int correctAnswer = 0;
   int? selectedAnswer;
@@ -158,9 +158,11 @@ class _GameScreenState extends State<GameScreen> {
     startTimer();
   }
 
+  int get questionTimeLimit => level <= 3 ? 25 : level <= 6 ? 30 : level <= 10 ? 35 : 40;
+
   void startTimer() {
     timer?.cancel();
-    timeLeft = 25;
+    timeLeft = questionTimeLimit;
     timer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted || answered || gameOver || !gameStarted) {
         t.cancel();
@@ -687,7 +689,7 @@ class _GameScreenState extends State<GameScreen> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(20),
                 child: LinearProgressIndicator(
-                  value: timeLeft / 25,
+                  value: timeLeft / questionTimeLimit,
                   minHeight: 9,
                   backgroundColor: Colors.deepPurple.shade50,
                   color: timeLeft <= 7 ? Colors.red : Colors.deepPurple,
