@@ -271,7 +271,7 @@ class _GameScreenState extends State<GameScreen> {
       timedOut = value == null;
 
       if (value == correctAnswer) {
-        final earned = 10 + max(0, timeLeft ~/ 5);
+        final int earned = 10 + max(0, timeLeft ~/ 5).toInt();
         score += earned;
         totalScore += earned;
         questionInLevel++;
