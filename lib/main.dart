@@ -651,169 +651,243 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Widget buildGame() {
+    final compact = MediaQuery.sizeOf(context).height < 760;
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Expanded(child: smallInfo('🏆 امتیاز', fa('$score'))),
-            const SizedBox(width: 8),
-            Expanded(child: smallInfo('⭐ مرحله', fa('$level'))),
-            const SizedBox(width: 8),
-            Expanded(child: smallInfo('❤️ جان', fa('$lives'))),
-          ],
-        ),
-        const SizedBox(height: 16),
         Container(
-          padding: const EdgeInsets.all(20),
-          decoration: cardDecoration(),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF281052), Color(0xFF6846D8), Color(0xFF9875F5)],
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+            ),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(color: const Color(0xFF6846D8).withValues(alpha: 0.2), blurRadius: 18, offset: const Offset(0, 6)),
+            ],
+          ),
           child: Column(
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    '⏱️ زمان پاسخ',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  IconButton(
+                    onPressed: goHome,
+                    tooltip: 'بازگشت به خانه',
+                    icon: const Icon(Icons.close_rounded, color: Colors.white),
+                    style: IconButton.styleFrom(backgroundColor: Colors.white.withValues(alpha: 0.14)),
                   ),
-                  Text(
-                    '${fa('$timeLeft')} ثانیه',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: timeLeft <= 7 ? Colors.red : Colors.deepPurple,
-                    ),
-                  ),
+                  const Spacer(),
+                  const Text('ماجراجویی ریاضی', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+                  const Spacer(),
+                  const Icon(Icons.auto_awesome_rounded, color: Colors.amberAccent),
                 ],
               ),
               const SizedBox(height: 8),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: LinearProgressIndicator(
-                  value: timeLeft / questionTimeLimit,
-                  minHeight: 9,
-                  backgroundColor: Colors.deepPurple.shade50,
-                  color: timeLeft <= 7 ? Colors.red : Colors.deepPurple,
-                ),
-              ),
-              const SizedBox(height: 28),
-              const Text('🧠', style: TextStyle(fontSize: 46)),
-              const SizedBox(height: 10),
-              Directionality(
-                // Arithmetic expressions must always be laid out left to right,
-                // even though the surrounding game UI is Persian/RTL.
-                textDirection: TextDirection.ltr,
-                child: Text(
-                  question,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 36,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFF39246B),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 28),
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1.8,
-                children: options.map((option) {
-                  Color color = const Color(0xFFEDE7F6);
-                  Color textColor = const Color(0xFF39246B);
-
-                  if (answered && option == correctAnswer) {
-                    color = const Color(0xFFC8E6C9);
-                    textColor = Colors.green.shade900;
-                  } else if (answered && option == selectedAnswer) {
-                    color = const Color(0xFFFFCDD2);
-                    textColor = Colors.red.shade900;
-                  }
-
-                  return ElevatedButton(
-                    onPressed: answered ? null : () => answerQuestion(option),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: color,
-                      disabledBackgroundColor: color,
-                      foregroundColor: textColor,
-                      disabledForegroundColor: textColor,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                    ),
-                    child: Text(
-                      fa('$option'),
-                      style: const TextStyle(
-                        fontSize: 27,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 22),
-              if (answered) ...[
-                Text(
-                  selectedAnswer == correctAnswer
-                      ? '🎉 آفرین! جواب درست بود.'
-                      : timedOut
-                          ? '⏰ وقت تمام شد! جواب ${fa('$correctAnswer')} بود.'
-                          : '💪 جواب درست ${fa('$correctAnswer')} بود.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                    color: selectedAnswer == correctAnswer
-                        ? Colors.green.shade700
-                        : Colors.red.shade700,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                if (!gameOver)
-                  SizedBox(
-                    width: double.infinity,
-                    height: 54,
-                    child: ElevatedButton(
-                      onPressed: nextQuestion,
-                      style: primaryButtonStyle(),
-                      child: const Text(
-                        'سؤال بعدی  ←',
-                        style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  )
-                else
-                  SizedBox(
-                    width: double.infinity,
-                    height: 54,
-                    child: ElevatedButton(
-                      onPressed: () => setState(() {
-                        gameStarted = false;
-                        gameOver = true;
-                      }),
-                      style: primaryButtonStyle(),
-                      child: const Text('دیدن نتیجه'),
-                    ),
-                  ),
-              ],
-              const SizedBox(height: 8),
-              TextButton.icon(
-                onPressed: goHome,
-                icon: const Icon(Icons.home_rounded),
-                label: const Text('بازگشت به خانه'),
+              Row(
+                children: [
+                  Expanded(child: _gameStat(icon: Icons.stars_rounded, label: 'امتیاز', value: fa('$score'))),
+                  const SizedBox(width: 8),
+                  Expanded(child: _gameStat(icon: Icons.flag_rounded, label: 'مرحله', value: '${fa('$level')} از ۳۰')),
+                  const SizedBox(width: 8),
+                  Expanded(child: _gameStat(icon: Icons.favorite_rounded, label: 'جان', value: '❤️' * lives)),
+                ],
               ),
             ],
           ),
         ),
-        const SizedBox(height: 14),
-        Text(
-          'پاسخ درست در این مرحله: ${fa('$questionInLevel')} از ۵',
-          style: const TextStyle(fontSize: 15, color: Colors.black54),
+        SizedBox(height: compact ? 12 : 18),
+        Container(
+          padding: EdgeInsets.all(compact ? 15 : 22),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(color: const Color(0xFFE5DDFB)),
+            boxShadow: [
+              BoxShadow(color: const Color(0xFF39246B).withValues(alpha: 0.06), blurRadius: 18, offset: const Offset(0, 5)),
+            ],
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(9),
+                    decoration: BoxDecoration(color: const Color(0xFFF0EBFF), borderRadius: BorderRadius.circular(14)),
+                    child: const Icon(Icons.timer_rounded, color: Color(0xFF6846D8)),
+                  ),
+                  const SizedBox(width: 10),
+                  const Expanded(child: Text('زمان باقی‌مانده', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
+                  Text(
+                    '${fa('$timeLeft')} ثانیه',
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: timeLeft <= 7 ? Colors.red.shade700 : const Color(0xFF6846D8)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: LinearProgressIndicator(
+                  value: (timeLeft / questionTimeLimit).clamp(0.0, 1.0).toDouble(),
+                  minHeight: 8,
+                  backgroundColor: const Color(0xFFEDE7F6),
+                  color: timeLeft <= 7 ? Colors.redAccent : const Color(0xFF8A63EF),
+                ),
+              ),
+              SizedBox(height: compact ? 18 : 26),
+              Container(
+                width: 70,
+                height: 70,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(colors: [Color(0xFFF0EBFF), Color(0xFFE0D5FF)]),
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                alignment: Alignment.center,
+                child: const Text('🧠', style: TextStyle(fontSize: 40)),
+              ),
+              const SizedBox(height: 10),
+              const Text('جواب درست را انتخاب کن', style: TextStyle(fontSize: 14, color: Colors.black54, fontWeight: FontWeight.w600)),
+              SizedBox(height: compact ? 8 : 14),
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: compact ? 14 : 20, horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8F6FF),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFFE5DDFB)),
+                  ),
+                  child: Text(
+                    question,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: compact ? 32 : 38, fontWeight: FontWeight.w900, color: const Color(0xFF39246B)),
+                  ),
+                ),
+              ),
+              SizedBox(height: compact ? 16 : 22),
+              GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: compact ? 2.0 : 1.9,
+                children: options.map((option) {
+                  final isCorrect = answered && option == correctAnswer;
+                  final isWrong = answered && option == selectedAnswer && option != correctAnswer;
+                  final background = isCorrect
+                      ? const Color(0xFFD8F7E3)
+                      : isWrong
+                          ? const Color(0xFFFFE0E3)
+                          : const Color(0xFFF1EDFF);
+                  final foreground = isCorrect
+                      ? const Color(0xFF176B3A)
+                      : isWrong
+                          ? const Color(0xFFB42332)
+                          : const Color(0xFF39246B);
+                  return ElevatedButton(
+                    onPressed: answered ? null : () => answerQuestion(option),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: background,
+                      disabledBackgroundColor: background,
+                      foregroundColor: foreground,
+                      disabledForegroundColor: foreground,
+                      elevation: 0,
+                      padding: const EdgeInsets.all(8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        side: BorderSide(
+                          color: isCorrect ? const Color(0xFF65C98A) : isWrong ? const Color(0xFFEF8A95) : const Color(0xFFE1D7FF),
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (isCorrect) ...[const Icon(Icons.check_circle_rounded, size: 19), const SizedBox(width: 5)]
+                        else if (isWrong) ...[const Icon(Icons.cancel_rounded, size: 19), const SizedBox(width: 5)],
+                        Flexible(child: Text(fa('$option'), style: TextStyle(fontSize: compact ? 24 : 27, fontWeight: FontWeight.w900))),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+              if (answered) ...[
+                const SizedBox(height: 14),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: selectedAnswer == correctAnswer ? const Color(0xFFE8F8EE) : const Color(0xFFFFF0F1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    selectedAnswer == correctAnswer
+                        ? '🎉 آفرین! جواب درست بود.'
+                        : timedOut
+                            ? '⏰ وقت تمام شد! جواب ${fa('$correctAnswer')} بود.'
+                            : '💪 جواب درست ${fa('$correctAnswer')} بود.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: selectedAnswer == correctAnswer ? const Color(0xFF176B3A) : const Color(0xFFB42332)),
+                  ),
+                ),
+                if (!gameOver) ...[
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton.icon(
+                      onPressed: nextQuestion,
+                      icon: const Icon(Icons.arrow_back_rounded),
+                      label: const Text('سؤال بعدی', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+                      style: primaryButtonStyle(),
+                    ),
+                  ),
+                ],
+              ],
+            ],
+          ),
+        ),
+        SizedBox(height: compact ? 10 : 14),
+        Row(
+          children: [
+            const Icon(Icons.bolt_rounded, color: Color(0xFF6846D8), size: 20),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                'پاسخ‌های درست این مرحله: ${fa('$questionInLevel')} از ۵',
+                style: const TextStyle(fontSize: 13, color: Color(0xFF665A83), fontWeight: FontWeight.w600),
+              ),
+            ),
+            Text(rankNames[rankIndex], style: const TextStyle(fontSize: 12, color: Color(0xFF6846D8), fontWeight: FontWeight.w900)),
+          ],
         ),
       ],
+    );
+  }
+
+  Widget _gameStat({required IconData icon, required String label, required String value}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.13),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: Colors.white, size: 19),
+          const SizedBox(height: 4),
+          Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white70, fontSize: 11)),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(value, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900)),
+          ),
+        ],
+      ),
     );
   }
 
