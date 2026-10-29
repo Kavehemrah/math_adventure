@@ -79,16 +79,20 @@ class _GameScreenState extends State<GameScreen> {
     loadBestScore();
   }
 
+  // Ranks are ordered from lowest to highest.
   static const List<String> rankNames = [
-    'شاگرد جادوگر',
-    'جادوگر تازه‌کار',
-    'جادوگر ماهر',
-    'استاد محاسبات',
-    'قهرمان ریاضی',
-    'استاد بزرگ ریاضی',
+    'noob',
+    'good',
+    'pro',
+    'master',
+    'grand master',
+    'hacker',
+    'god of math',
   ];
-  static const List<String> rankEmojis = ['🪄', '✨', '🔮', '🧙', '🏆', '👑'];
-  static const List<int> rankThresholds = [0, 250, 700, 1400, 2500, 4000];
+  static const List<String> rankEmojis = [
+    '🐣', '👍', '⚡', '🥋', '🏆', '💻', '👑',
+  ];
+  static const List<int> rankThresholds = [0, 100, 350, 800, 1600, 2800, 4500];
 
   int get rankPoints => totalScore + (unlockedLevel - 1) * 100 + levelsCleared * 50;
 
