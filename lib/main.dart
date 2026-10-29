@@ -104,7 +104,7 @@ class _GameScreenState extends State<GameScreen> {
     if (rankIndex == rankNames.length - 1) return 1;
     final start = rankThresholds[rankIndex];
     final end = rankThresholds[rankIndex + 1];
-    return ((rankPoints - start) / (end - start)).clamp(0.0, 1.0);
+    return ((rankPoints - start) / (end - start)).clamp(0.0, 1.0).toDouble();
   }
 
   Future<void> loadBestScore() async {
@@ -112,7 +112,7 @@ class _GameScreenState extends State<GameScreen> {
     if (!mounted) return;
     setState(() {
       bestScore = prefs.getInt('best_score') ?? 0;
-      unlockedLevel = (prefs.getInt('unlocked_level') ?? 1).clamp(1, 30);
+      unlockedLevel = (prefs.getInt('unlocked_level') ?? 1).clamp(1, 30).toInt();
       totalScore = prefs.getInt('total_score') ?? 0;
       levelsCleared = prefs.getInt('levels_cleared') ?? 0;
     });
