@@ -53,6 +53,8 @@ class _GameScreenState extends State<GameScreen> {
   Timer? timer;
   int bestScore = 0;
   int unlockedLevel = 1;
+  int totalScore = 0;
+  int levelsCleared = 0;
   int score = 0;
   int level = 1;
   int lives = 3;
@@ -77,20 +79,59 @@ class _GameScreenState extends State<GameScreen> {
     loadBestScore();
   }
 
+  static const List<String> rankNames = [
+    'شاگرد جادوگر',
+    'جادوگر تازه‌کار',
+    'جادوگر ماهر',
+    'استاد محاسبات',
+    'قهرمان ریاضی',
+    'استاد بزرگ ریاضی',
+  ];
+  static const List<String> rankEmojis = ['🪄', '✨', '🔮', '🧙', '🏆', '👑'];
+  static const List<int> rankThresholds = [0, 250, 700, 1400, 2500, 4000];
+
+  int get rankPoints => totalScore + (unlockedLevel - 1) * 100 + levelsCleared * 50;
+
+  int get rankIndex {
+    var index = 0;
+    for (var i = 0; i < rankThresholds.length; i++) {
+      if (rankPoints >= rankThresholds[i]) index = i;
+    }
+    return index;
+  }
+
+  double get rankProgress {
+    if (rankIndex == rankNames.length - 1) return 1;
+    final start = rankThresholds[rankIndex];
+    final end = rankThresholds[rankIndex + 1];
+    return ((rankPoints - start) / (end - start)).clamp(0.0, 1.0);
+  }
+
   Future<void> loadBestScore() async {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
     setState(() {
       bestScore = prefs.getInt('best_score') ?? 0;
-      unlockedLevel = max(1, prefs.getInt('unlocked_level') ?? 1);
+      unlockedLevel = (prefs.getInt('unlocked_level') ?? 1).clamp(1, 30);
+      totalScore = prefs.getInt('total_score') ?? 0;
+      levelsCleared = prefs.getInt('levels_cleared') ?? 0;
     });
   }
 
   Future<void> saveBestScore() async {
-    if (score <= bestScore) return;
-    bestScore = score;
+    if (score > bestScore) bestScore = score;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('best_score', bestScore);
+    await prefs.setInt('total_score', totalScore);
+    await prefs.setInt('levels_cleared', levelsCleared);
+    await prefs.setInt('unlocked_level', unlockedLevel);
+  }
+
+  Future<void> saveProgress() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('total_score', totalScore);
+    await prefs.setInt('levels_cleared', levelsCleared);
+    await prefs.setInt('unlocked_level', unlockedLevel);
   }
 
   Future<void> saveUnlockedLevel() async {
@@ -141,26 +182,35 @@ class _GameScreenState extends State<GameScreen> {
     int result;
     String op;
 
-    final List<String> operations = level <= 2
+    final List<String> operations = level <= 3
         ? ['+', '-']
-        : level <= 4
+        : level <= 6
             ? ['+', '-', '×']
             : ['+', '-', '×', '÷'];
 
     op = operations[random.nextInt(operations.length)];
 
-    if (level <= 2) {
+    if (level <= 3) {
       a = random.nextInt(20) + 1;
       b = random.nextInt(20) + 1;
-    } else if (level <= 4) {
+    } else if (level <= 6) {
       a = random.nextInt(50) + 10;
-      b = random.nextInt(20) + 1;
-    } else if (level <= 7) {
+      b = random.nextInt(30) + 1;
+    } else if (level <= 10) {
       a = random.nextInt(90) + 10;
-      b = random.nextInt(12) + 2;
+      b = random.nextInt(30) + 2;
+    } else if (level <= 15) {
+      a = random.nextInt(180) + 20;
+      b = random.nextInt(40) + 2;
+    } else if (level <= 20) {
+      a = random.nextInt(250) + 50;
+      b = random.nextInt(50) + 2;
+    } else if (level <= 25) {
+      a = random.nextInt(400) + 100;
+      b = random.nextInt(60) + 2;
     } else {
-      a = random.nextInt(150) + 20;
-      b = random.nextInt(15) + 2;
+      a = random.nextInt(800) + 100;
+      b = random.nextInt(80) + 2;
     }
 
     if (op == '-' && b > a) {
@@ -170,14 +220,23 @@ class _GameScreenState extends State<GameScreen> {
     }
 
     if (op == '÷') {
-      result = random.nextInt(min(level + 5, 15)) + 2;
-      b = random.nextInt(10) + 2;
+      result = random.nextInt(min(level + 5, 30)) + 2;
+      b = random.nextInt(min(5 + level, 40)) + 2;
       a = result * b;
     } else if (op == '×') {
-      if (level <= 4) {
-        a = random.nextInt(12) + 2;
-        b = random.nextInt(10) + 2;
-      }
+      final maxFactor = level <= 6
+          ? 12
+          : level <= 10
+              ? 15
+              : level <= 15
+                  ? 20
+                  : level <= 20
+                      ? 25
+                      : level <= 25
+                          ? 30
+                          : 40;
+      a = random.nextInt(maxFactor - 1) + 2;
+      b = random.nextInt(maxFactor - 1) + 2;
       result = a * b;
     } else if (op == '+') {
       result = a + b;
@@ -212,18 +271,21 @@ class _GameScreenState extends State<GameScreen> {
       timedOut = value == null;
 
       if (value == correctAnswer) {
-        score += 10 + max(0, timeLeft ~/ 5);
+        final earned = 10 + max(0, timeLeft ~/ 5);
+        score += earned;
+        totalScore += earned;
         questionInLevel++;
         SystemSound.play(SystemSoundType.click);
 
         if (questionInLevel >= 5) {
-          level++;
-          if (level > unlockedLevel) {
+          levelsCleared++;
+          if (level < 30) level++;
+          if (level > unlockedLevel && level <= 30) {
             unlockedLevel = level;
-            saveUnlockedLevel();
           }
           questionInLevel = 0;
         }
+        saveProgress();
       } else {
         lives--;
         HapticFeedback.heavyImpact();
@@ -352,6 +414,8 @@ class _GameScreenState extends State<GameScreen> {
           ),
         ),
         SizedBox(height: compact ? 12 : 18),
+        buildRankCard(),
+        SizedBox(height: compact ? 10 : 14),
         Container(
           width: double.infinity,
           padding: EdgeInsets.all(compact ? 14 : 18),
@@ -424,6 +488,73 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
+  Widget buildRankCard() {
+    final currentRank = rankIndex;
+    final isMaxRank = currentRank == rankNames.length - 1;
+    final nextThreshold = isMaxRank ? rankPoints : rankThresholds[currentRank + 1];
+    final remaining = max(0, nextThreshold - rankPoints);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFD9CCFF)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Text(rankEmojis[currentRank], style: const TextStyle(fontSize: 34)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('رتبهٔ جادویی تو', style: TextStyle(fontSize: 13, color: Colors.black54)),
+                    Text(rankNames[currentRank], style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Color(0xFF39246B))),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(fa('$rankPoints'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
+                  const Text('امتیاز رتبه', style: TextStyle(fontSize: 11, color: Colors.black54)),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: rankProgress,
+              minHeight: 8,
+              backgroundColor: const Color(0xFFEDE7F6),
+              color: const Color(0xFF6846D8),
+            ),
+          ),
+          const SizedBox(height: 7),
+          Text(
+            isMaxRank
+                ? 'به بالاترین رتبه رسیدی! 👑'
+                : 'تا رتبهٔ بعدی: ${fa('$remaining')} امتیاز رتبه',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 12, color: Colors.black54),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'امتیاز کل: ${fa('$totalScore')}  •  مرحله‌های تکمیل‌شده: ${fa('$levelsCleared')}',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget buildLevelMap() {
     return Column(
       children: [
@@ -436,7 +567,7 @@ class _GameScreenState extends State<GameScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          'مرحله‌های بازشده: ${fa('$unlockedLevel')} از ۱۰',
+          'مرحله‌های بازشده: ${fa('$unlockedLevel')} از ۳۰',
           style: const TextStyle(fontSize: 16, color: Colors.black54),
         ),
         const SizedBox(height: 20),
@@ -444,7 +575,7 @@ class _GameScreenState extends State<GameScreen> {
           padding: const EdgeInsets.all(16),
           decoration: cardDecoration(),
           child: Column(
-            children: List.generate(10, (index) {
+            children: List.generate(30, (index) {
               final stage = index + 1;
               final isUnlocked = stage <= unlockedLevel;
               final isCurrent = stage == unlockedLevel;
@@ -710,8 +841,10 @@ class _GameScreenState extends State<GameScreen> {
             style: const TextStyle(fontSize: 19),
           ),
           const SizedBox(height: 22),
-          resultRow('امتیاز نهایی', fa('$score')),
+          resultRow('امتیاز این دور', fa('$score')),
           resultRow('مرحله رسیده‌شده', fa('$level')),
+          resultRow('رتبهٔ فعلی', rankNames[rankIndex]),
+          resultRow('امتیاز کل', fa('$totalScore')),
           resultRow('بهترین امتیاز', fa('$bestScore')),
           const SizedBox(height: 24),
           SizedBox(
