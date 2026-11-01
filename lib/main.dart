@@ -70,6 +70,7 @@ class _GameScreenState extends State<GameScreen> {
   bool answered = false;
   bool gameStarted = false;
   bool showMap = false;
+  bool showChapterMenu = false;
   bool gameOver = false;
   bool timedOut = false;
 
@@ -152,6 +153,7 @@ class _GameScreenState extends State<GameScreen> {
       questionInLevel = 0;
       gameStarted = true;
       showMap = false;
+      showChapterMenu = false;
       gameOver = false;
       createQuestion();
     });
@@ -323,6 +325,7 @@ class _GameScreenState extends State<GameScreen> {
     setState(() {
       gameStarted = false;
       showMap = false;
+      showChapterMenu = false;
       gameOver = false;
     });
   }
@@ -346,7 +349,9 @@ class _GameScreenState extends State<GameScreen> {
                   ? buildGameOver()
                   : showMap
                       ? buildLevelMap()
-                      : !gameStarted
+                      : showChapterMenu
+                          ? buildChapterMenu()
+                          : !gameStarted
                           ? buildHome()
                           : buildGame(),
             ),
@@ -462,6 +467,24 @@ class _GameScreenState extends State<GameScreen> {
                 width: double.infinity,
                 height: compact ? 46 : 50,
                 child: OutlinedButton.icon(
+                  onPressed: () => setState(() => showChapterMenu = true),
+                  icon: const Icon(Icons.menu_book_rounded),
+                  label: const Text(
+                    'تمرین فصل‌های ریاضی چهارم',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF6846D8),
+                    side: const BorderSide(color: Color(0xFF6846D8), width: 1.5),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                ),
+              ),
+              SizedBox(height: compact ? 8 : 11),
+              SizedBox(
+                width: double.infinity,
+                height: compact ? 46 : 50,
+                child: OutlinedButton.icon(
                   onPressed: () => setState(() => showMap = true),
                   icon: const Icon(Icons.map_rounded),
                   label: const Text(
@@ -558,6 +581,70 @@ class _GameScreenState extends State<GameScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  static const List<Map<String, String>> grade4Chapters = [
+    {'title': 'اعداد و الگوها', 'icon': '🔢', 'topics': 'عددنویسی، الگوها، ماشین ورودی‌ـ‌خروجی، میلیون'},
+    {'title': 'کسر', 'icon': '🍕', 'topics': 'شناخت کسر، جمع و تفریق، تساوی کسرها، ضرب عدد در کسر'},
+    {'title': 'ضرب و تقسیم', 'icon': '✖️', 'topics': 'ضرب دورقمی، تقریب، تقسیم و بخش‌پذیری'},
+    {'title': 'اندازه‌گیری', 'icon': '📐', 'topics': 'زاویه، زمان و طول'},
+    {'title': 'عدد مخلوط و عدد اعشاری', 'icon': '🔟', 'topics': 'عدد مخلوط، اعشار، جمع و تفریق، ارزش مکانی'},
+    {'title': 'شکل‌های هندسی', 'icon': '🔷', 'topics': 'عمود و موازی، چهارضلعی، مساحت و محیط'},
+    {'title': 'آمار و احتمال', 'icon': '📊', 'topics': 'نمودار خط شکسته و احتمال'},
+  ];
+
+  Widget buildChapterMenu() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text('📚', textAlign: TextAlign.center, style: TextStyle(fontSize: 58)),
+        const Text('تمرین فصل‌های ریاضی چهارم', textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.w900, color: Color(0xFF39246B))),
+        const SizedBox(height: 8),
+        const Text('فصل موردنظر را انتخاب کن', textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 15, color: Colors.black54)),
+        const SizedBox(height: 16),
+        ...grade4Chapters.asMap().entries.map((entry) {
+          final index = entry.key;
+          final chapter = entry.value;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Material(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(18),
+                onTap: () {
+                  setState(() => showChapterMenu = false);
+                  startGame();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Row(children: [
+                    Text(chapter['icon']!, style: const TextStyle(fontSize: 30)),
+                    const SizedBox(width: 12),
+                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text('فصل ' + fa('${index + 1}') + ': ' + chapter['title']!,
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 4),
+                      Text(chapter['topics']!,
+                        style: const TextStyle(fontSize: 12, color: Colors.black54)),
+                    ])),
+                    const Icon(Icons.play_circle_fill_rounded, color: Color(0xFF6846D8)),
+                  ]),
+                ),
+              ),
+            ),
+          );
+        }),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: () => setState(() => showChapterMenu = false),
+          icon: const Icon(Icons.home_rounded),
+          label: const Text('بازگشت به خانه'),
+        ),
+      ],
     );
   }
 
