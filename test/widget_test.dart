@@ -1,5 +1,6 @@
 import 'dart:ui' show Offset;
 
+import 'package:flutter/widgets.dart' show CustomPaint;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:math_adventure/main.dart';
