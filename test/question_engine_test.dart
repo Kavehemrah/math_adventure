@@ -33,11 +33,26 @@ void main() {
       }
     });
 
-    test('rejects an invalid chapter number', () {
-      expect(
-        () => QuestionEngine.generate(chapter: 8),
-        throwsArgumentError,
-      );
+    test('chapter three generates valid multiplication questions at low and high levels', () {
+      for (final level in [1, 10, 20, 30]) {
+        final question = QuestionEngine.generate(
+          chapter: 3,
+          level: level,
+          random: Random(level),
+        );
+        expect(question.chapter, 3);
+        expect(question.options, hasLength(4));
+        expect(question.options, contains(question.answer));
+      }
+    });
+
+    test('rejects chapter numbers outside the supported range', () {
+      for (final chapter in [0, 8, -1]) {
+        expect(
+          () => QuestionEngine.generate(chapter: chapter),
+          throwsArgumentError,
+        );
+      }
     });
   });
 }
