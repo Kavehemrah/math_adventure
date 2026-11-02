@@ -625,7 +625,7 @@ class _GameScreenState extends State<GameScreen> {
                     Text(chapter['icon']!, style: const TextStyle(fontSize: 30)),
                     const SizedBox(width: 12),
                     Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text('فصل ' + fa('${index + 1}') + ': ' + chapter['title']!,
+                      Text('فصل ${fa('${index + 1}')}: ${chapter['title']}',
                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 4),
                       Text(chapter['topics']!,
