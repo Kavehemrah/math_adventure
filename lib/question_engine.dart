@@ -140,7 +140,7 @@ class QuestionEngine {
         final hour = total ~/ 60;
         final minute = total % 60;
         final answer = '${_fa(hour)}:${_fa(minute.toString().padLeft(2, '0'))}';
-        return _q(r, 4, 'زمان', 'کلاسی ساعت ${_fa(start)}:۰۰ شروع می‌شود و ${_fa(duration)} دقیقه طول می‌کشد. چه ساعتی تمام می‌شود؟', answer, ['${_fa(hour)}:${_fa((minute + 10) % 60)}', '${_fa(hour + 1)}:${_fa(minute)}', '${_fa(hour - 1)}:${_fa(minute)}'], 'مدت زمان را به ساعت شروع اضافه می‌کنیم.');
+        return _q(r, 4, 'زمان', 'کلاسی ساعت ${_fa(start)}:۰۰ شروع می‌شود و ${_fa(duration)} دقیقه طول می‌کشد. چه ساعتی تمام می‌شود؟', answer, ['${_fa(hour)}:${_fa((minute + 10) % 60)}', '${_fa(hour + 1)}:${_fa((minute + 15) % 60)}', '${_fa(hour - 1)}:${_fa(minute)}'], 'مدت زمان را به ساعت شروع اضافه می‌کنیم.');
     }
   }
 
@@ -214,7 +214,7 @@ class QuestionEngine {
         final total = r.nextInt(5) + 5;
         final red = r.nextInt(total - 1) + 1;
         final blue = total - red;
-        return _q(r, 7, 'احتمال ساده', 'در کیسه‌ای ${_fa(red)} مهره قرمز و ${_fa(blue)} مهره آبی است. احتمال بیرون آوردن مهره قرمز کدام است؟', _f(red, total), [_f(blue, total), _f(red + 1, total), _f(1, total)], 'احتمال برابر تعداد حالت مطلوب تقسیم بر تعداد کل حالت‌هاست.');
+        return _q(r, 7, 'احتمال ساده', 'در کیسه‌ای ${_fa(red)} مهره قرمز و ${_fa(blue)} مهره آبی است. احتمال بیرون آوردن مهره قرمز کدام است؟', _f(red, total), [_f(blue, total), _f(red + 1, total + 1), _f(red > 1 ? red - 1 : 1, total), _f(1, total + 1)], 'احتمال برابر تعداد حالت مطلوب تقسیم بر تعداد کل حالت‌هاست.');
       default:
         final impossible = r.nextBool();
         return _q(r, 7, 'مقایسه احتمال', impossible ? 'در پرتاب یک تاس معمولی، عدد ۷ بیاید.' : 'فردا صبح خورشید طلوع کند.', impossible ? 'غیرممکن' : 'قطعی', impossible ? ['قطعی', 'کم', 'زیاد'] : ['غیرممکن', 'کم', 'برابر'], 'به حالت‌های ممکن این رویداد توجه می‌کنیم.');
