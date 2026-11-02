@@ -808,6 +808,48 @@ class _GameScreenState extends State<GameScreen> {
         if (selectedChapter == null) ...[
           SizedBox(height: compact ? 12 : 18),
           Container(
+            padding: EdgeInsets.all(compact ? 15 : 22),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(26),
+              border: Border.all(color: const Color(0xFFE5DDFB)),
+              boxShadow: [
+                BoxShadow(color: const Color(0xFF39246B).withValues(alpha: 0.06), blurRadius: 18, offset: const Offset(0, 5)),
+              ],
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(9),
+                      decoration: BoxDecoration(color: const Color(0xFFF0EBFF), borderRadius: BorderRadius.circular(14)),
+                      child: const Icon(Icons.timer_rounded, color: Color(0xFF6846D8)),
+                    ),
+                    const SizedBox(width: 10),
+                    const Expanded(child: Text('زمان باقی‌مانده', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
+                    Text(
+                      '${fa('$timeLeft')} ثانیه',
+                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: timeLeft <= 7 ? Colors.red.shade700 : const Color(0xFF6846D8)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: LinearProgressIndicator(
+                    value: (timeLeft / questionTimeLimit).clamp(0.0, 1.0).toDouble(),
+                    minHeight: 8,
+                    backgroundColor: const Color(0xFFEDE7F6),
+                    color: timeLeft <= 7 ? Colors.redAccent : const Color(0xFF8A63EF),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+        SizedBox(height: compact ? 12 : 18),
+        Container(
           padding: EdgeInsets.all(compact ? 15 : 22),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -819,36 +861,6 @@ class _GameScreenState extends State<GameScreen> {
           ),
           child: Column(
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(9),
-                    decoration: BoxDecoration(color: const Color(0xFFF0EBFF), borderRadius: BorderRadius.circular(14)),
-                    child: const Icon(Icons.timer_rounded, color: Color(0xFF6846D8)),
-                  ),
-                  const SizedBox(width: 10),
-                  const Expanded(child: Text('زمان باقی‌مانده', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
-                  Text(
-                    '${fa('$timeLeft')} ثانیه',
-                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: timeLeft <= 7 ? Colors.red.shade700 : const Color(0xFF6846D8)),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: LinearProgressIndicator(
-                  value: (timeLeft / questionTimeLimit).clamp(0.0, 1.0).toDouble(),
-                  minHeight: 8,
-                  backgroundColor: const Color(0xFFEDE7F6),
-                  color: timeLeft <= 7 ? Colors.redAccent : const Color(0xFF8A63EF),
-                ),
-              ),
-              SizedBox(height: compact ? 18 : 26),
-          ),
-        ],
-        if (selectedChapter != null) SizedBox(height: compact ? 12 : 18),
-        Container(
                 width: 70,
                 height: 70,
                 decoration: BoxDecoration(
@@ -967,6 +979,8 @@ class _GameScreenState extends State<GameScreen> {
                   ),
                 ],
               ],
+            ],
+          ),
             ],
           ),
         ),
