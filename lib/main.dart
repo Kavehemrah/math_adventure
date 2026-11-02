@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'question_engine.dart';
 
 void main() {
   runApp(const MathAdventureApp());
@@ -60,12 +61,14 @@ class _GameScreenState extends State<GameScreen> {
   int lives = 3;
   int timeLeft = 40;
   int questionInLevel = 0;
-  int correctAnswer = 0;
-  int? selectedAnswer;
+  String correctAnswer = '';
+  String? selectedAnswer;
+  int? selectedChapter;
+  MathQuestion? currentQuestion;
 
   String question = '';
   String operationName = '';
-  List<int> options = [];
+  List<String> options = [];
 
   bool answered = false;
   bool gameStarted = false;
@@ -144,11 +147,13 @@ class _GameScreenState extends State<GameScreen> {
     await prefs.setInt('unlocked_level', unlockedLevel);
   }
 
-  void startGame({int? startingLevel}) {
+  void startGame({int? startingLevel, int? chapter}) {
     timer?.cancel();
     setState(() {
       score = 0;
       level = startingLevel ?? 1;
+      selectedChapter = chapter;
+      currentQuestion = null;
       lives = 3;
       questionInLevel = 0;
       gameStarted = true;
@@ -184,6 +189,19 @@ class _GameScreenState extends State<GameScreen> {
     answered = false;
     timedOut = false;
     selectedAnswer = null;
+
+    if (selectedChapter != null) {
+      currentQuestion = QuestionEngine.generate(
+        chapter: selectedChapter,
+        level: level,
+        random: random,
+      );
+      question = currentQuestion!.prompt;
+      correctAnswer = currentQuestion!.answer;
+      options = currentQuestion!.options;
+      return;
+    }
+    currentQuestion = null;
 
     int a;
     int b;
@@ -252,7 +270,7 @@ class _GameScreenState extends State<GameScreen> {
       result = a - b;
     }
 
-    correctAnswer = result;
+    correctAnswer = result.toString();
     question = '${fa('$a')} $op ${fa('$b')} = ؟';
 
     final Set<int> choices = {result};
@@ -264,10 +282,10 @@ class _GameScreenState extends State<GameScreen> {
       }
     }
 
-    options = choices.toList()..shuffle(random);
+    options = choices.map((value) => value.toString()).toList()..shuffle(random);
   }
 
-  void answerQuestion(int? value) {
+  void answerQuestion(String? value) {
     if (answered || gameOver) return;
 
     timer?.cancel();
@@ -285,7 +303,7 @@ class _GameScreenState extends State<GameScreen> {
         questionInLevel++;
         SystemSound.play(SystemSoundType.click);
 
-        if (questionInLevel >= 5) {
+        if (selectedChapter == null && questionInLevel >= 5) {
           levelsCleared++;
           if (level < 30) level++;
           if (level > unlockedLevel && level <= 30) {
@@ -326,6 +344,8 @@ class _GameScreenState extends State<GameScreen> {
       gameStarted = false;
       showMap = false;
       showChapterMenu = false;
+      selectedChapter = null;
+      currentQuestion = null;
       gameOver = false;
     });
   }
@@ -616,8 +636,7 @@ class _GameScreenState extends State<GameScreen> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(18),
                 onTap: () {
-                  setState(() => showChapterMenu = false);
-                  startGame();
+                  startGame(chapter: index + 1);
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(14),
