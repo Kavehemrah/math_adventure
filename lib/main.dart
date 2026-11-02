@@ -877,6 +877,40 @@ class _GameScreenState extends State<GameScreen> {
                 const SizedBox(height: 4),
                 Text(currentQuestion!.topic, style: const TextStyle(fontSize: 13, color: Color(0xFF6846D8), fontWeight: FontWeight.w800)),
               ],
+              if (currentQuestion?.fractionVisual case final visual?) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8F6FF),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFE5DDFB)),
+                  ),
+                  child: Column(
+                    children: [
+                      const Text('نمایش شکل کسر', style: TextStyle(fontSize: 12, color: Color(0xFF665A83), fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 9),
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        spacing: 4,
+                        runSpacing: 4,
+                        children: List.generate(
+                          visual.parts,
+                          (index) => Container(
+                            width: visual.parts > 6 ? 28 : 36,
+                            height: visual.parts > 6 ? 28 : 36,
+                            decoration: BoxDecoration(
+                              color: index < visual.filled ? const Color(0xFF55B879) : Colors.white,
+                              border: Border.all(color: const Color(0xFF39246B), width: 1.3),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               SizedBox(height: compact ? 8 : 14),
               Directionality(
                 textDirection: selectedChapter == null ? TextDirection.ltr : TextDirection.rtl,
