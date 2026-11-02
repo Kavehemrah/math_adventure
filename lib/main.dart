@@ -1338,7 +1338,9 @@ class _GameScreenState extends State<GameScreen> {
                                 usableWidth *
                                 visual.divisions)
                             .round();
-                        final index = rawIndex.clamp(0, visual.divisions);
+                        final index = rawIndex
+                            .clamp(0, visual.divisions)
+                            .toInt();
                         answerQuestion(visual.tickValues[index]);
                       },
                 child: CustomPaint(
