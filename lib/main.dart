@@ -983,7 +983,6 @@ class _GameScreenState extends State<GameScreen> {
             ],
           ),
         ),
-        ),
         SizedBox(height: compact ? 10 : 14),
         Row(
           children: [
