@@ -69,6 +69,72 @@ void main() {
       expect(addition.topic, 'جمع کسرها');
     });
 
+    test('each selected chapter two topic generates only its own topic', () {
+      const topics = {
+        'recognition': 'شناخت کسر',
+        'numerator_denominator': 'صورت و مخرج',
+        'number_line': 'کسر روی محور اعداد',
+        'equivalent': 'کسرهای مساوی',
+        'comparison': 'مقایسهٔ کسرها',
+        'addition': 'جمع کسرها',
+        'subtraction': 'تفریق کسرها',
+        'multiplication': 'ضرب عدد در کسر',
+      };
+
+      for (final entry in topics.entries) {
+        for (var seed = 0; seed < 30; seed++) {
+          final question = QuestionEngine.generate(
+            chapter: 2,
+            topic: entry.key,
+            level: seed + 1,
+            random: Random(seed),
+          );
+          expect(question.chapter, 2);
+          expect(question.topic, entry.value);
+          expect(question.options, hasLength(4));
+          expect(question.options.toSet(), hasLength(4));
+          expect(question.options, contains(question.answer));
+          expect(question.explanation, isNotEmpty);
+        }
+      }
+    });
+
+    test('number line questions expose valid touch targets and matching fractions', () {
+      for (var seed = 0; seed < 80; seed++) {
+        final question = QuestionEngine.generate(
+          chapter: 2,
+          topic: 'number_line',
+          random: Random(seed),
+        );
+        final line = question.fractionNumberLine!;
+        expect(line.divisions, line.tickValues.length - 1);
+        expect(line.numerator, inInclusiveRange(1, line.divisions - 1));
+        expect(question.answer, line.tickValues[line.numerator]);
+        expect(line.tickValues.first, '۰');
+        expect(line.tickValues.last, '۱');
+      }
+    });
+
+    test('fraction recognition rotates between bar, grid and circle visuals', () {
+      final styles = <FractionVisualStyle>{};
+      for (var seed = 0; seed < 120; seed++) {
+        final question = QuestionEngine.generate(
+          chapter: 2,
+          topic: 'recognition',
+          random: Random(seed),
+        );
+        styles.add(question.fractionVisual!.style);
+      }
+      expect(styles, containsAll(FractionVisualStyle.values));
+    });
+
+    test('rejects an unknown chapter two topic', () {
+      expect(
+        () => QuestionEngine.generate(chapter: 2, topic: 'unknown'),
+        throwsArgumentError,
+      );
+    });
+
     test('rejects chapter numbers outside the supported range', () {
       for (final chapter in [0, 8, -1]) {
         expect(
