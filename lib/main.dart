@@ -861,6 +861,7 @@ class _GameScreenState extends State<GameScreen> {
           ),
           child: Column(
             children: [
+              Container(
                 width: 70,
                 height: 70,
                 decoration: BoxDecoration(
@@ -981,8 +982,7 @@ class _GameScreenState extends State<GameScreen> {
               ],
             ],
           ),
-            ],
-          ),
+        ),
         ),
         SizedBox(height: compact ? 10 : 14),
         Row(
