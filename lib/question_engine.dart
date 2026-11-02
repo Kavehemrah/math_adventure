@@ -27,7 +27,7 @@ class QuestionEngine {
     if (c < 1 || c > 7) throw ArgumentError.value(c, 'chapter');
     switch (c) {
       case 1: return _chapter1(r);
-      case 2: return _chapter2(r);
+      case 2: return _chapter2(r, level);
       case 3: return _chapter3(r, level);
       case 4: return _chapter4(r);
       case 5: return _chapter5(r);
@@ -65,27 +65,30 @@ class QuestionEngine {
     }
   }
 
-  static MathQuestion _chapter2(Random r) {
-    final d = [4, 5, 6, 8, 10][r.nextInt(5)];
-    switch (r.nextInt(4)) {
+  static MathQuestion _chapter2(Random r, int level) {
+    // Start with fraction meaning, then equivalence, then operations.
+    final stage = level <= 3 ? 0 : level <= 6 ? 1 : level <= 10 ? 2 : 3;
+    final type = stage == 0 ? 0 : stage == 1 ? 1 : stage == 2 ? 2 : r.nextInt(4);
+    switch (type) {
       case 0:
-        final a = r.nextInt(d - 1) + 1;
-        final b = r.nextInt(d - a) + 1;
-        return _q(r, 2, 'جمع کسرها', 'حاصل جمع کسرها چیست؟\n${_f(a, d)} + ${_f(b, d)}', _f(a + b, d), [_f(a + b + 1, d), _f(a + b, d + 1), _f(a, d)], 'با برابر بودن مخرج‌ها، صورت‌ها را جمع می‌کنیم.');
+        final denominator = [2, 3, 4, 5, 6, 8][r.nextInt(6)];
+        final numerator = r.nextInt(denominator - 1) + 1;
+        return _q(r, 2, 'شناخت کسر', 'یک واحد به \${_fa(denominator)} قسمت مساوی تقسیم شده و \${_fa(numerator)} قسمت رنگی است. کسر رنگی کدام است؟', _f(numerator, denominator), [_f(numerator + 1, denominator), _f(numerator, denominator + 1), _f(denominator - numerator, denominator)], 'صورت تعداد قسمت‌های رنگی و مخرج تعداد کل قسمت‌های مساوی است.');
       case 1:
-        final a = r.nextInt(d - 1) + 2;
-        final b = r.nextInt(a - 1) + 1;
-        return _q(r, 2, 'تفریق کسرها', 'حاصل تفریق کسرها چیست؟\n${_f(a, d)} − ${_f(b, d)}', _f(a - b, d), [_f(a + b, d), _f(a - b + 1, d), _f(a - b, d + 1)], 'صورت کوچک‌تر را از صورت بزرگ‌تر کم می‌کنیم.');
+        final denominator = [2, 3, 4, 5, 6, 8][r.nextInt(6)];
+        final numerator = r.nextInt(denominator - 1) + 1;
+        final factor = r.nextInt(4) + 2;
+        return _q(r, 2, 'کسرهای مساوی', 'کدام کسر با \${_f(numerator, denominator)} مساوی است؟', _f(numerator * factor, denominator * factor), [_f(numerator + 1, denominator + factor), _f(numerator * factor, denominator), _f(numerator, denominator * factor)], 'برای ساختن کسر مساوی، صورت و مخرج را در یک عدد یکسان ضرب می‌کنیم.');
       case 2:
-        final a = r.nextInt(4) + 1;
-        final b = a + r.nextInt(5) + 1;
-        final factor = r.nextInt(3) + 2;
-        return _q(r, 2, 'کسرهای مساوی', 'کدام کسر با ${_f(a, b)} مساوی است؟', _f(a * factor, b * factor), [_f(a + 1, b + factor), _f(a * factor, b), _f(a, b * factor)], 'صورت و مخرج را در یک عدد یکسان ضرب می‌کنیم.');
+        final denominator = [4, 5, 6, 8, 10][r.nextInt(5)];
+        final a = r.nextInt(denominator - 1) + 1;
+        final b = r.nextInt(denominator - a) + 1;
+        return _q(r, 2, 'جمع کسرها', 'حاصل جمع کسرها چیست؟\n\${_f(a, denominator)} + \${_f(b, denominator)}', _f(a + b, denominator), [_f(a + b + 1, denominator), _f(a + b, denominator + 1), _f(a, denominator)], 'وقتی مخرج‌ها برابرند، صورت‌ها را جمع می‌کنیم.');
       default:
-        final den = [3, 4, 5, 6][r.nextInt(4)];
-        final num = r.nextInt(den - 1) + 1;
+        final denominator = [3, 4, 5, 6][r.nextInt(4)];
+        final numerator = r.nextInt(denominator - 1) + 1;
         final whole = r.nextInt(5) + 2;
-        return _q(r, 2, 'ضرب عدد در کسر', '${_fa(whole)} × ${_f(num, den)} = ؟', _f(whole * num, den), [_f(whole + num, den), _f(whole * num + 1, den), _f(whole * num, den + 1)], 'عدد صحیح را در صورت ضرب می‌کنیم و مخرج ثابت می‌ماند.');
+        return _q(r, 2, 'ضرب عدد در کسر', '\${_fa(whole)} × \${_f(numerator, denominator)} = ؟', _f(whole * numerator, denominator), [_f(whole + numerator, denominator), _f(whole * numerator + 1, denominator), _f(whole * numerator, denominator + 1)], 'عدد صحیح را در صورت ضرب می‌کنیم و مخرج ثابت می‌ماند.');
     }
   }
 
