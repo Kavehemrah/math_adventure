@@ -100,6 +100,27 @@ void main() {
     });
 
 
+    test('chapter two questions carry a misconception category for targeted feedback', () {
+      const expected = {
+        'recognition': 'fraction_parts_confusion',
+        'numerator_denominator': 'numerator_denominator_reversed',
+        'number_line': 'number_line_equal_intervals',
+        'equivalent': 'equivalence_one_sided_change',
+        'comparison': 'compare_numerators_only',
+        'addition': 'add_denominators',
+        'subtraction': 'subtract_denominators',
+        'multiplication': 'multiply_denominator',
+      };
+      for (final entry in expected.entries) {
+        final question = QuestionEngine.generate(
+          chapter: 2,
+          topic: entry.key,
+          random: Random(17),
+        );
+        expect(question.misconceptionCode, entry.value);
+      }
+    });
+
     test('chapter two includes contextual problems with valid answer choices', () {
       final found = <String>{};
       for (var seed = 0; seed < 100; seed++) {
