@@ -86,17 +86,17 @@ class QuestionEngine {
         final denominator = [2, 3, 4, 5, 6, 8][r.nextInt(6)];
         final numerator = r.nextInt(denominator - 1) + 1;
         final factor = r.nextInt(4) + 2;
-        return _q(r, 2, 'کسرهای مساوی', 'کدام کسر با \${_f(numerator, denominator)} مساوی است؟', _f(numerator * factor, denominator * factor), [_f(numerator + 1, denominator + factor), _f(numerator * factor, denominator), _f(numerator, denominator * factor)], 'برای ساختن کسر مساوی، صورت و مخرج را در یک عدد یکسان ضرب می‌کنیم.');
+        return _q(r, 2, 'کسرهای مساوی', 'کدام کسر با ${_f(numerator, denominator)} مساوی است؟', _f(numerator * factor, denominator * factor), [_f(numerator + 1, denominator + factor), _f(numerator * factor, denominator), _f(numerator, denominator * factor)], 'برای ساختن کسر مساوی، صورت و مخرج را در یک عدد یکسان ضرب می‌کنیم.');
       case 2:
         final denominator = [4, 5, 6, 8, 10][r.nextInt(5)];
         final a = r.nextInt(denominator - 1) + 1;
         final b = r.nextInt(denominator - a) + 1;
-        return _q(r, 2, 'جمع کسرها', 'حاصل جمع کسرها چیست؟\n\${_f(a, denominator)} + \${_f(b, denominator)}', _f(a + b, denominator), [_f(a + b + 1, denominator), _f(a + b, denominator + 1), _f(a, denominator)], 'وقتی مخرج‌ها برابرند، صورت‌ها را جمع می‌کنیم.');
+        return _q(r, 2, 'جمع کسرها', 'حاصل جمع کسرها چیست؟\n${_f(a, denominator)} + ${_f(b, denominator)}', _f(a + b, denominator), [_f(a + b + 1, denominator), _f(a + b, denominator + 1), _f(a, denominator)], 'وقتی مخرج‌ها برابرند، صورت‌ها را جمع می‌کنیم.');
       default:
         final denominator = [3, 4, 5, 6][r.nextInt(4)];
         final numerator = r.nextInt(denominator - 1) + 1;
         final whole = r.nextInt(5) + 2;
-        return _q(r, 2, 'ضرب عدد در کسر', '\${_fa(whole)} × \${_f(numerator, denominator)} = ؟', _f(whole * numerator, denominator), [_f(whole + numerator, denominator), _f(whole * numerator + 1, denominator), _f(whole * numerator, denominator + 1)], 'عدد صحیح را در صورت ضرب می‌کنیم و مخرج ثابت می‌ماند.');
+        return _q(r, 2, 'ضرب عدد در کسر', '${_fa(whole)} × ${_f(numerator, denominator)} = ؟', _f(whole * numerator, denominator), [_f(whole + numerator, denominator), _f(whole * numerator + 1, denominator), _f(whole * numerator, denominator + 1)], 'عدد صحیح را در صورت ضرب می‌کنیم و مخرج ثابت می‌ماند.');
     }
   }
 
