@@ -918,7 +918,7 @@ class _GameScreenState extends State<GameScreen> {
                       children: [
                         if (isCorrect) ...[const Icon(Icons.check_circle_rounded, size: 19), const SizedBox(width: 5)]
                         else if (isWrong) ...[const Icon(Icons.cancel_rounded, size: 19), const SizedBox(width: 5)],
-                        Flexible(child: Text(fa('$option'), style: TextStyle(fontSize: compact ? 24 : 27, fontWeight: FontWeight.w900))),
+                        Flexible(child: Text(fa(option), style: TextStyle(fontSize: compact ? 24 : 27, fontWeight: FontWeight.w900))),
                       ],
                     ),
                   );
@@ -937,8 +937,8 @@ class _GameScreenState extends State<GameScreen> {
                     selectedAnswer == correctAnswer
                         ? '🎉 آفرین! جواب درست بود.'
                         : timedOut
-                            ? '⏰ وقت تمام شد! جواب ${fa('$correctAnswer')} بود.'
-                            : '💪 جواب درست ${fa('$correctAnswer')} بود.',
+                            ? '⏰ وقت تمام شد! جواب ${fa(correctAnswer)} بود.'
+                            : '💪 جواب درست ${fa(correctAnswer)} بود.',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: selectedAnswer == correctAnswer ? const Color(0xFF176B3A) : const Color(0xFFB42332)),
                   ),
