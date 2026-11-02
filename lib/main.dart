@@ -162,12 +162,13 @@ class _GameScreenState extends State<GameScreen> {
       gameOver = false;
       createQuestion();
     });
-    startTimer();
+    if (chapter == null) startTimer();
   }
 
   int get questionTimeLimit => level <= 3 ? 25 : level <= 6 ? 30 : level <= 10 ? 35 : 40;
 
   void startTimer() {
+    if (selectedChapter != null) return;
     timer?.cancel();
     timeLeft = questionTimeLimit;
     timer = Timer.periodic(const Duration(seconds: 1), (t) {
@@ -301,6 +302,7 @@ class _GameScreenState extends State<GameScreen> {
         score += earned;
         totalScore += earned;
         questionInLevel++;
+        if (selectedChapter != null) level++;
         SystemSound.play(SystemSoundType.click);
 
         if (selectedChapter == null && questionInLevel >= 5) {
@@ -335,7 +337,7 @@ class _GameScreenState extends State<GameScreen> {
   void nextQuestion() {
     if (gameOver) return;
     setState(createQuestion);
-    startTimer();
+    if (selectedChapter == null) startTimer();
   }
 
   void goHome() {
