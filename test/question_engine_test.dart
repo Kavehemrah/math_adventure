@@ -46,6 +46,29 @@ void main() {
       }
     });
 
+    test('chapter two begins with a fraction model and readable Persian values', () {
+      for (var level = 1; level <= 3; level++) {
+        final question = QuestionEngine.generate(
+          chapter: 2,
+          level: level,
+          random: Random(level),
+        );
+        expect(question.topic, 'شناخت کسر');
+        expect(question.fractionVisual, isNotNull);
+        expect(question.prompt, isNot(contains(r'\${')));
+        expect(question.prompt, contains('قسمت مساوی'));
+      }
+    });
+
+    test('chapter two progresses from fraction recognition to equivalence and operations', () {
+      final recognition = QuestionEngine.generate(chapter: 2, level: 1, random: Random(1));
+      final equivalence = QuestionEngine.generate(chapter: 2, level: 4, random: Random(1));
+      final addition = QuestionEngine.generate(chapter: 2, level: 7, random: Random(1));
+      expect(recognition.topic, 'شناخت کسر');
+      expect(equivalence.topic, 'کسرهای مساوی');
+      expect(addition.topic, 'جمع کسرها');
+    });
+
     test('rejects chapter numbers outside the supported range', () {
       for (final chapter in [0, 8, -1]) {
         expect(
