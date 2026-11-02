@@ -237,6 +237,19 @@ class QuestionEngine {
         );
       }
       case 'addition': {
+
+        if (r.nextBool()) {
+          final denominator = [4, 5, 6, 8][r.nextInt(4)];
+          final a = r.nextInt(denominator - 1) + 1;
+          final b = r.nextInt(denominator - a) + 1;
+          return _q(
+            r, 2, 'جمع کسرها',
+            'مریم ${_f(a, denominator)} یک کیک و سارا ${_f(b, denominator)} همان کیک را خوردند. در مجموع چه کسری از کیک خورده شده است؟',
+            _f(a + b, denominator),
+            [_f(a + b, denominator * 2), _f(a + b + 1, denominator), _f(a, denominator)],
+            'هر دو کسر از یک کیک و با قسمت‌های هم‌اندازه‌اند؛ صورت‌ها را جمع می‌کنیم و مخرج ثابت می‌ماند.',
+          );
+        }
         final denominator = [4, 5, 6, 8, 10][r.nextInt(5)];
         final a = r.nextInt(denominator - 1) + 1;
         final b = r.nextInt(denominator - a) + 1;
@@ -255,6 +268,19 @@ class QuestionEngine {
         );
       }
       case 'subtraction': {
+
+        if (r.nextBool()) {
+          final denominator = [4, 5, 6, 8][r.nextInt(4)];
+          final total = r.nextInt(denominator - 1) + 2;
+          final used = r.nextInt(total - 1) + 1;
+          return _q(
+            r, 2, 'تفریق کسرها',
+            'از نواری به طول ${_f(total, denominator)} متر، ${_f(used, denominator)} متر بریده‌ایم. چند متر باقی مانده است؟',
+            _f(total - used, denominator),
+            [_f(total + used, denominator), _f(total - used, denominator + 1), _f(used, denominator)],
+            'مقدار بریده‌شده را از مقدار اولیه کم می‌کنیم؛ چون مخرج‌ها برابرند، فقط صورت‌ها کم می‌شوند.',
+          );
+        }
         final denominator = [3, 4, 5, 6, 8, 10][r.nextInt(6)];
         final larger = r.nextInt(denominator - 1) + 1;
         final smaller = r.nextInt(larger) ;
@@ -273,6 +299,19 @@ class QuestionEngine {
         );
       }
       case 'multiplication': {
+
+        if (r.nextBool()) {
+          final denominator = [3, 4, 5, 6][r.nextInt(4)];
+          final numerator = r.nextInt(denominator - 1) + 1;
+          final groups = r.nextInt(4) + 2;
+          return _q(
+            r, 2, 'ضرب عدد در کسر',
+            'در هر بسته ${_f(numerator, denominator)} کیلوگرم خرماست. در ${_fa(groups)} بسته، روی‌هم چند کیلوگرم خرما داریم؟',
+            _f(groups * numerator, denominator),
+            [_f(groups + numerator, denominator), _f(groups * numerator, denominator + 1), _f(numerator, denominator)],
+            'مقدار هر بسته را به تعداد بسته‌ها تکرار می‌کنیم؛ یعنی عدد صحیح را در صورت ضرب می‌کنیم و مخرج ثابت می‌ماند.',
+          );
+        }
         final denominator = [3, 4, 5, 6, 8][r.nextInt(5)];
         final numerator = r.nextInt(denominator - 1) + 1;
         final whole = r.nextInt(5) + 2;
