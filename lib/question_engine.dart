@@ -174,11 +174,11 @@ class QuestionEngine {
         final a = r.nextInt(12) + 4;
         final b = r.nextInt(8) + 3;
         return _n(r, 6, 'مساحت مستطیل', 'طول مستطیل ${_fa(a)} و عرض آن ${_fa(b)} سانتی‌متر است. مساحت چقدر است؟', a * b, [2 * (a + b), a * b + a, a * b - b], 'مساحت مستطیل برابر طول ضربدر عرض است.', ' سانتی‌متر مربع');
-      case 1:
+      case 2:
         final base = r.nextInt(12) + 4;
         final height = r.nextInt(8) + 3;
         return _n(r, 6, 'مساحت متوازی‌الاضلاع', 'قاعده ${_fa(base)} و ارتفاع ${_fa(height)} سانتی‌متر است. مساحت چقدر است؟', base * height, [2 * (base + height), base * height + base, base * height - height], 'مساحت متوازی‌الاضلاع برابر قاعده ضربدر ارتفاع است.', ' سانتی‌متر مربع');
-      case 2:
+      case 3:
         final base = (r.nextInt(8) + 2) * 2;
         final height = r.nextInt(8) + 2;
         final area = base * height ~/ 2;
