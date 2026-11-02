@@ -64,7 +64,9 @@ class _GameScreenState extends State<GameScreen> {
   String correctAnswer = '';
   String? selectedAnswer;
   int? selectedChapter;
+  String? selectedTopic;
   MathQuestion? currentQuestion;
+  final Map<String, int> topicProgress = {};
 
   String question = '';
   String operationName = '';
@@ -74,6 +76,7 @@ class _GameScreenState extends State<GameScreen> {
   bool gameStarted = false;
   bool showMap = false;
   bool showChapterMenu = false;
+  bool showTopicMenu = false;
   bool gameOver = false;
   bool timedOut = false;
 
@@ -117,8 +120,18 @@ class _GameScreenState extends State<GameScreen> {
 
   Future<void> loadBestScore() async {
     final prefs = await SharedPreferences.getInstance();
+    final savedTopicProgress = <String, int>{};
+    for (final key in prefs.getKeys()) {
+      if (key.startsWith('chapter2_topic_')) {
+        savedTopicProgress[key.substring('chapter2_topic_'.length)] =
+            prefs.getInt(key) ?? 0;
+      }
+    }
     if (!mounted) return;
     setState(() {
+      topicProgress
+        ..clear()
+        ..addAll(savedTopicProgress);
       bestScore = prefs.getInt('best_score') ?? 0;
       unlockedLevel = (prefs.getInt('unlocked_level') ?? 1).clamp(1, 30).toInt();
       totalScore = prefs.getInt('total_score') ?? 0;
@@ -140,6 +153,12 @@ class _GameScreenState extends State<GameScreen> {
     await prefs.setInt('total_score', totalScore);
     await prefs.setInt('levels_cleared', levelsCleared);
     await prefs.setInt('unlocked_level', unlockedLevel);
+    if (selectedTopic != null) {
+      await prefs.setInt(
+        'chapter2_topic_$selectedTopic',
+        topicProgress[selectedTopic!] ?? 0,
+      );
+    }
   }
 
   Future<void> saveUnlockedLevel() async {
@@ -147,12 +166,18 @@ class _GameScreenState extends State<GameScreen> {
     await prefs.setInt('unlocked_level', unlockedLevel);
   }
 
-  void startGame({int? startingLevel, int? chapter}) {
+  void startGame({
+    int? startingLevel,
+    int? chapter,
+    String? topic,
+  }) {
     timer?.cancel();
     setState(() {
       score = 0;
       level = startingLevel ?? 1;
       selectedChapter = chapter;
+      selectedTopic = topic;
+      showTopicMenu = false;
       currentQuestion = null;
       lives = 3;
       questionInLevel = 0;
@@ -195,6 +220,7 @@ class _GameScreenState extends State<GameScreen> {
       currentQuestion = QuestionEngine.generate(
         chapter: selectedChapter,
         level: level,
+        topic: selectedTopic,
         random: random,
       );
       question = currentQuestion!.prompt;
@@ -302,6 +328,10 @@ class _GameScreenState extends State<GameScreen> {
         score += earned;
         totalScore += earned;
         questionInLevel++;
+        if (selectedTopic != null) {
+          topicProgress[selectedTopic!] =
+              (topicProgress[selectedTopic!] ?? 0) + 1;
+        }
         if (selectedChapter != null) level++;
         SystemSound.play(SystemSoundType.click);
 
@@ -346,7 +376,9 @@ class _GameScreenState extends State<GameScreen> {
       gameStarted = false;
       showMap = false;
       showChapterMenu = false;
+      showTopicMenu = false;
       selectedChapter = null;
+      selectedTopic = null;
       currentQuestion = null;
       gameOver = false;
     });
@@ -373,7 +405,9 @@ class _GameScreenState extends State<GameScreen> {
                       ? buildLevelMap()
                       : showChapterMenu
                           ? buildChapterMenu()
-                          : !gameStarted
+                          : showTopicMenu
+                              ? buildTopicMenu()
+                              : !gameStarted
                           ? buildHome()
                           : buildGame(),
             ),
@@ -616,6 +650,160 @@ class _GameScreenState extends State<GameScreen> {
     {'title': 'آمار و احتمال', 'icon': '📊', 'topics': 'نمودار خط شکسته و احتمال'},
   ];
 
+  static const List<Map<String, String>> grade4Chapter2Topics = [
+    {
+      'id': 'recognition',
+      'title': 'شناخت کسر',
+      'subtitle': 'کسر یعنی چند قسمت از یک واحد',
+      'icon': '🍕',
+    },
+    {
+      'id': 'numerator_denominator',
+      'title': 'صورت و مخرج',
+      'subtitle': 'بالا و پایین خط کسر را بشناس',
+      'icon': '🔢',
+    },
+    {
+      'id': 'number_line',
+      'title': 'کسر روی محور اعداد',
+      'subtitle': 'نقطهٔ درست را روی محور لمس کن',
+      'icon': '📍',
+    },
+    {
+      'id': 'equivalent',
+      'title': 'کسرهای مساوی',
+      'subtitle': 'کسرهایی با اندازهٔ یکسان',
+      'icon': '🟰',
+    },
+    {
+      'id': 'comparison',
+      'title': 'مقایسهٔ کسرها',
+      'subtitle': 'بزرگ‌تر، کوچک‌تر یا مساوی',
+      'icon': '⚖️',
+    },
+    {
+      'id': 'addition',
+      'title': 'جمع کسرها',
+      'subtitle': 'جمع کسرها با مخرج برابر',
+      'icon': '➕',
+    },
+    {
+      'id': 'subtraction',
+      'title': 'تفریق کسرها',
+      'subtitle': 'تفریق کسرها با مخرج برابر',
+      'icon': '➖',
+    },
+    {
+      'id': 'multiplication',
+      'title': 'ضرب عدد در کسر',
+      'subtitle': 'ضرب عدد صحیح در یک کسر',
+      'icon': '✖️',
+    },
+  ];
+
+  String topicTitle(String? topic) {
+    for (final item in grade4Chapter2Topics) {
+      if (item['id'] == topic) return item['title']!;
+    }
+    return 'تمرین کسر';
+  }
+
+  Widget buildTopicMenu() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text('🍕', textAlign: TextAlign.center, style: TextStyle(fontSize: 54)),
+        const Text(
+          'تمرین فصل دوم: کسر',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 25,
+            fontWeight: FontWeight.w900,
+            color: Color(0xFF39246B),
+          ),
+        ),
+        const SizedBox(height: 7),
+        const Text(
+          'امروز روی کدام مبحث کار می‌کنی؟',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 14, color: Colors.black54),
+        ),
+        const SizedBox(height: 16),
+        ...grade4Chapter2Topics.map((topic) {
+          final id = topic['id']!;
+          final completed = topicProgress[id] ?? 0;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 9),
+            child: Material(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(18),
+                onTap: () => startGame(chapter: 2, topic: id),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  child: Row(
+                    children: [
+                      Text(topic['icon']!, style: const TextStyle(fontSize: 28)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              topic['title']!,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF39246B),
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              topic['subtitle']!,
+                              style: const TextStyle(fontSize: 11, color: Colors.black54),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        children: [
+                          const Icon(
+                            Icons.check_circle_outline_rounded,
+                            color: Color(0xFF55B879),
+                            size: 20,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            fa('$completed'),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF665A83),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: () => setState(() {
+            showTopicMenu = false;
+            showChapterMenu = true;
+          }),
+          icon: const Icon(Icons.arrow_forward_rounded),
+          label: const Text('بازگشت به فصل‌ها'),
+        ),
+      ],
+    );
+  }
+
   Widget buildChapterMenu() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -638,7 +826,14 @@ class _GameScreenState extends State<GameScreen> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(18),
                 onTap: () {
-                  startGame(chapter: index + 1);
+                  if (index == 1) {
+                    setState(() {
+                      showChapterMenu = false;
+                      showTopicMenu = true;
+                    });
+                  } else {
+                    startGame(chapter: index + 1);
+                  }
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(14),
@@ -787,7 +982,18 @@ class _GameScreenState extends State<GameScreen> {
                     style: IconButton.styleFrom(backgroundColor: Colors.white.withValues(alpha: 0.14)),
                   ),
                   const Spacer(),
-                  Text(selectedChapter == null ? 'ماجراجویی ریاضی' : 'تمرین فصل ${fa('$selectedChapter')}', style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+                  Text(
+                    selectedChapter == null
+                        ? 'ماجراجویی ریاضی'
+                        : selectedTopic == null
+                            ? 'تمرین فصل ${fa('$selectedChapter')}'
+                            : topicTitle(selectedTopic),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const Spacer(),
                   const Icon(Icons.auto_awesome_rounded, color: Colors.amberAccent),
                 ],
@@ -888,27 +1094,30 @@ class _GameScreenState extends State<GameScreen> {
                   ),
                   child: Column(
                     children: [
-                      const Text('نمایش شکل کسر', style: TextStyle(fontSize: 12, color: Color(0xFF665A83), fontWeight: FontWeight.w700)),
-                      const SizedBox(height: 9),
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        spacing: 4,
-                        runSpacing: 4,
-                        children: List.generate(
-                          visual.parts,
-                          (index) => Container(
-                            width: visual.parts > 6 ? 28 : 36,
-                            height: visual.parts > 6 ? 28 : 36,
-                            decoration: BoxDecoration(
-                              color: index < visual.filled ? const Color(0xFF55B879) : Colors.white,
-                              border: Border.all(color: const Color(0xFF39246B), width: 1.3),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
+                      const Text(
+                        'نمایش شکل کسر',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF665A83),
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
+                      const SizedBox(height: 10),
+                      _buildFractionVisual(visual),
                     ],
                   ),
+                ),
+              ],
+              if (currentQuestion?.fractionNumberLine case final line?) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.fromLTRB(12, 14, 12, 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8F6FF),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFE5DDFB)),
+                  ),
+                  child: _buildInteractiveNumberLine(line),
                 ),
               ],
               SizedBox(height: compact ? 8 : 14),
@@ -930,7 +1139,8 @@ class _GameScreenState extends State<GameScreen> {
                 ),
               ),
               SizedBox(height: compact ? 16 : 22),
-              GridView.count(
+              if (currentQuestion?.fractionNumberLine == null)
+                GridView.count(
                 crossAxisCount: 2,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -1037,6 +1247,141 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
+  Widget _buildFractionVisual(FractionVisual visual) {
+    switch (visual.style) {
+      case FractionVisualStyle.bar:
+        return SizedBox(
+          height: 42,
+          child: Row(
+            children: List.generate(
+              visual.parts,
+              (index) => Expanded(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 2),
+                  decoration: BoxDecoration(
+                    color: index < visual.filled
+                        ? const Color(0xFF55B879)
+                        : Colors.white,
+                    border: Border.all(
+                      color: const Color(0xFF39246B),
+                      width: 1.2,
+                    ),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      case FractionVisualStyle.grid:
+        return Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 5,
+          runSpacing: 5,
+          children: List.generate(
+            visual.parts,
+            (index) => Container(
+              width: visual.parts > 6 ? 30 : 38,
+              height: visual.parts > 6 ? 30 : 38,
+              decoration: BoxDecoration(
+                color: index < visual.filled
+                    ? const Color(0xFF55B879)
+                    : Colors.white,
+                border: Border.all(
+                  color: const Color(0xFF39246B),
+                  width: 1.2,
+                ),
+                borderRadius: BorderRadius.circular(5),
+              ),
+            ),
+          ),
+        );
+      case FractionVisualStyle.circle:
+        return CustomPaint(
+          size: const Size(132, 132),
+          painter: FractionCirclePainter(
+            parts: visual.parts,
+            filled: visual.filled,
+          ),
+        );
+    }
+  }
+
+  Widget _buildInteractiveNumberLine(FractionNumberLineVisual visual) {
+    final selectedIndex = selectedAnswer == null
+        ? null
+        : visual.tickValues.indexOf(selectedAnswer!);
+    return Column(
+      children: [
+        const Text(
+          'از صفر تا یک؛ محل کسر را روی یکی از نقطه‌ها لمس کن',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF665A83),
+          ),
+        ),
+        const SizedBox(height: 7),
+        SizedBox(
+          height: 62,
+          width: double.infinity,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTapUp: answered
+                    ? null
+                    : (details) {
+                        final usableWidth = max(1.0, constraints.maxWidth - 28);
+                        final rawIndex = ((details.localPosition.dx - 14) /
+                                usableWidth *
+                                visual.divisions)
+                            .round();
+                        final index = rawIndex.clamp(0, visual.divisions);
+                        answerQuestion(visual.tickValues[index]);
+                      },
+                child: CustomPaint(
+                  size: Size(constraints.maxWidth, 62),
+                  painter: FractionNumberLinePainter(
+                    divisions: visual.divisions,
+                    selectedIndex: selectedIndex,
+                    correctIndex: answered ? visual.numerator : null,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Row(
+            children: List.generate(
+              visual.tickValues.length,
+              (index) => Expanded(
+                child: Text(
+                  fa(visual.tickValues[index]),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.visible,
+                  style: TextStyle(
+                    fontSize: visual.divisions > 6 ? 9 : 10,
+                    color: selectedIndex == index
+                        ? const Color(0xFF39246B)
+                        : const Color(0xFF665A83),
+                    fontWeight: selectedIndex == index
+                        ? FontWeight.w900
+                        : FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _gameStat({required IconData icon, required String label, required String value}) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
@@ -1100,7 +1445,10 @@ class _GameScreenState extends State<GameScreen> {
             width: double.infinity,
             height: 56,
             child: ElevatedButton.icon(
-              onPressed: () => startGame(chapter: selectedChapter),
+              onPressed: () => startGame(
+                chapter: selectedChapter,
+                topic: selectedTopic,
+              ),
               icon: const Icon(Icons.replay_rounded),
               label: const Text('بازی دوباره', style: TextStyle(fontSize: 19)),
               style: primaryButtonStyle(),
@@ -1172,4 +1520,127 @@ class _GameScreenState extends State<GameScreen> {
       elevation: 2,
     );
   }
+}
+
+
+class FractionCirclePainter extends CustomPainter {
+  const FractionCirclePainter({
+    required this.parts,
+    required this.filled,
+  });
+
+  final int parts;
+  final int filled;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = min(size.width, size.height) / 2 - 2;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    final border = Paint()
+      ..color = const Color(0xFF39246B)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+
+    for (var index = 0; index < parts; index++) {
+      final start = -pi / 2 + index * 2 * pi / parts;
+      final sweep = 2 * pi / parts;
+      final path = Path()
+        ..moveTo(center.dx, center.dy)
+        ..arcTo(rect, start, sweep, false)
+        ..close();
+      canvas.drawPath(
+        path,
+        Paint()
+          ..color = index < filled
+              ? const Color(0xFF55B879)
+              : Colors.white,
+      );
+      canvas.drawPath(path, border);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant FractionCirclePainter oldDelegate) =>
+      oldDelegate.parts != parts || oldDelegate.filled != filled;
+}
+
+class FractionNumberLinePainter extends CustomPainter {
+  const FractionNumberLinePainter({
+    required this.divisions,
+    required this.selectedIndex,
+    required this.correctIndex,
+  });
+
+  final int divisions;
+  final int? selectedIndex;
+  final int? correctIndex;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const start = 14.0;
+    const endPadding = 14.0;
+    final end = size.width - endPadding;
+    final y = size.height / 2 - 3;
+    final axisPaint = Paint()
+      ..color = const Color(0xFF39246B)
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+    final tickPaint = Paint()
+      ..color = const Color(0xFF665A83)
+      ..strokeWidth = 1.6;
+
+    canvas.drawLine(Offset(start, y), Offset(end, y), axisPaint);
+    for (var index = 0; index <= divisions; index++) {
+      final x = start + (end - start) * index / divisions;
+      canvas.drawLine(
+        Offset(x, y - 9),
+        Offset(x, y + 9),
+        tickPaint,
+      );
+      canvas.drawCircle(
+        Offset(x, y),
+        3.2,
+        Paint()..color = const Color(0xFF6846D8),
+      );
+    }
+
+    if (correctIndex != null) {
+      final x = start + (end - start) * correctIndex! / divisions;
+      canvas.drawCircle(
+        Offset(x, y),
+        8,
+        Paint()..color = const Color(0xFF55B879),
+      );
+      canvas.drawCircle(
+        Offset(x, y),
+        3,
+        Paint()..color = Colors.white,
+      );
+    }
+
+    if (selectedIndex != null && selectedIndex! >= 0) {
+      final x = start + (end - start) * selectedIndex! / divisions;
+      final isCorrect = selectedIndex == correctIndex;
+      canvas.drawCircle(
+        Offset(x, y),
+        8,
+        Paint()
+          ..color = isCorrect || correctIndex == null
+              ? const Color(0xFF6846D8)
+              : const Color(0xFFE05B64),
+      );
+      canvas.drawCircle(
+        Offset(x, y),
+        3,
+        Paint()..color = Colors.white,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant FractionNumberLinePainter oldDelegate) =>
+      oldDelegate.divisions != divisions ||
+      oldDelegate.selectedIndex != selectedIndex ||
+      oldDelegate.correctIndex != correctIndex;
 }
