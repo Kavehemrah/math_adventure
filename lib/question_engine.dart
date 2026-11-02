@@ -172,7 +172,7 @@ class QuestionEngine {
           'صورت و مخرج',
           'در کسر ${_fa(numerator)}/${_fa(denominator)}، ${askNumerator ? 'صورت' : 'مخرج'} کدام عدد است؟',
           answer,
-          wrong,
+          wrong.toList(),
           askNumerator
               ? 'عدد بالای خط کسر، صورت نام دارد.'
               : 'عدد پایین خط کسر، مخرج نام دارد.',
