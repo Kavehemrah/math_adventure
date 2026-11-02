@@ -1001,6 +1001,7 @@ class _GameScreenState extends State<GameScreen> {
               Row(
                 children: [
                   IconButton(
+                    key: const ValueKey('practice-back-button'),
                     onPressed: backFromPractice,
                     tooltip: selectedChapter == 2
                         ? 'بازگشت به مباحث فصل کسر'
