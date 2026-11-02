@@ -860,7 +860,7 @@ class _GameScreenState extends State<GameScreen> {
               ],
               SizedBox(height: compact ? 8 : 14),
               Directionality(
-                textDirection: TextDirection.ltr,
+                textDirection: selectedChapter == null ? TextDirection.ltr : TextDirection.rtl,
                 child: Container(
                   width: double.infinity,
                   padding: EdgeInsets.symmetric(vertical: compact ? 14 : 20, horizontal: 8),
