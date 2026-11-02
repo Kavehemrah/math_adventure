@@ -36,6 +36,7 @@ class MathQuestion {
     required this.explanation,
     this.fractionVisual,
     this.fractionNumberLine,
+    this.misconceptionCode,
   });
 
   final String prompt;
@@ -46,6 +47,7 @@ class MathQuestion {
   final String explanation;
   final FractionVisual? fractionVisual;
   final FractionNumberLineVisual? fractionNumberLine;
+  final String? misconceptionCode;
 }
 
 class QuestionEngine {
@@ -499,7 +501,22 @@ class QuestionEngine {
       explanation: explanation,
       fractionVisual: fractionVisual,
       fractionNumberLine: fractionNumberLine,
+      misconceptionCode: _misconceptionFor(topic),
     );
+  }
+
+  static String? _misconceptionFor(String topic) {
+    const codes = {
+      'شناخت کسر': 'fraction_parts_confusion',
+      'صورت و مخرج': 'numerator_denominator_reversed',
+      'کسر روی محور اعداد': 'number_line_equal_intervals',
+      'کسرهای مساوی': 'equivalence_one_sided_change',
+      'مقایسهٔ کسرها': 'compare_numerators_only',
+      'جمع کسرها': 'add_denominators',
+      'تفریق کسرها': 'subtract_denominators',
+      'ضرب عدد در کسر': 'multiply_denominator',
+    };
+    return codes[topic];
   }
 
   static String _f(int n, int d) {
