@@ -1,5 +1,3 @@
-import 'dart:ui' show Offset;
-
 import 'package:flutter/widgets.dart' show CustomPaint;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -46,7 +44,8 @@ void main() {
     await tester.tap(numberLineTopic);
     await tester.pumpAndSettle();
 
-    expect(find.text('کسر روی محور اعداد'), findsOneWidget);
+    // The topic appears both in the game header and in the question card.
+    expect(find.text('کسر روی محور اعداد'), findsNWidgets(2));
     final numberLine = find.byWidgetPredicate(
       (widget) =>
           widget is CustomPaint &&
