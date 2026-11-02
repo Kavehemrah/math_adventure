@@ -96,7 +96,7 @@ class QuestionEngine {
         final a = r.nextInt(maxFactor - 10) + 11;
         final b = r.nextInt(maxFactor - 10) + 11;
         final answer = a * b;
-        return _n(r, 3, 'ضرب دورقمی', '${_fa(a)} × ${_fa(b)} = ؟', answer, [answer + b, answer - b, (a + 1) * b], 'دو عدد دورقمی را در هم ضرب می‌کنیم.');
+        return _n(r, 3, 'ضرب دورقمی', '${_fa(a)} × ${_fa(b)} = ؟', answer, [answer + b, answer - b, answer + 1], 'دو عدد دورقمی را در هم ضرب می‌کنیم.');
       case 1:
         final a = (r.nextInt(8) + 2) * 10 + r.nextInt(9);
         final b = (r.nextInt(7) + 2) * 10 + r.nextInt(9);
@@ -118,17 +118,21 @@ class QuestionEngine {
   }
 
   static MathQuestion _chapter4(Random r) {
-    switch (r.nextInt(3)) {
+    switch (r.nextInt(4)) {
       case 0:
         final angle = [35, 60, 90, 115, 140, 170][r.nextInt(6)];
         final answer = angle < 90 ? 'تند' : angle == 90 ? 'قائمه' : 'باز';
-        final wrong = ['تند', 'قائمه', 'باز']..remove(answer);
+        final wrong = ['تند', 'قائمه', 'باز', 'مستقیم']..remove(answer);
         return _q(r, 4, 'زاویه', 'زاویه ${_fa(angle)} درجه چه نوع زاویه‌ای است؟', answer, wrong, 'کمتر از ۹۰ درجه تند، ۹۰ درجه قائمه و بیشتر از ۹۰ درجه باز است.');
       case 1:
         final meters = r.nextInt(8) + 1;
         final centimeters = r.nextInt(10) * 10;
         final answer = meters * 100 + centimeters;
         return _n(r, 4, 'تبدیل واحد طول', '${_fa(meters)} متر و ${_fa(centimeters)} سانتی‌متر چند سانتی‌متر است؟', answer, [answer + 10, answer - 10, meters + centimeters], 'هر متر ۱۰۰ سانتی‌متر است.', ' سانتی‌متر');
+      case 2:
+        final hours = r.nextInt(4) + 1;
+        final minutes = hours * 60;
+        return _n(r, 4, 'تبدیل واحد زمان', '${_fa(hours)} ساعت چند دقیقه است؟', minutes, [minutes + 30, minutes - 30, hours * 60 + 10], 'هر ساعت ۶۰ دقیقه است؛ تعداد ساعت‌ها را در ۶۰ ضرب می‌کنیم.', ' دقیقه');
       default:
         final start = r.nextInt(4) + 8;
         final duration = [20, 30, 40, 45, 50, 60][r.nextInt(6)];
