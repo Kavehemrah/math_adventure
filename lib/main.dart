@@ -1673,9 +1673,11 @@ class FractionNumberLinePainter extends CustomPainter {
         Offset(x, y),
         8,
         Paint()
-          ..color = isCorrect || correctIndex == null
-              ? const Color(0xFF6846D8)
-              : const Color(0xFFE05B64),
+          ..color = isCorrect
+              ? const Color(0xFF55B879)
+              : correctIndex == null
+                  ? const Color(0xFF6846D8)
+                  : const Color(0xFFE05B64),
       );
       canvas.drawCircle(
         Offset(x, y),
