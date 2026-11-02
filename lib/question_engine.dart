@@ -28,7 +28,7 @@ class QuestionEngine {
     switch (c) {
       case 1: return _chapter1(r);
       case 2: return _chapter2(r);
-      case 3: return _chapter3(r);
+      case 3: return _chapter3(r, level);
       case 4: return _chapter4(r);
       case 5: return _chapter5(r);
       case 6: return _chapter6(r);
@@ -89,13 +89,14 @@ class QuestionEngine {
     }
   }
 
-  static MathQuestion _chapter3(Random r) {
+  static MathQuestion _chapter3(Random r, int level) {
     switch (r.nextInt(4)) {
       case 0:
-        final a = r.nextInt(19) + 11;
-        final b = r.nextInt(8) + 2;
+        final maxFactor = level <= 10 ? 39 : level <= 20 ? 69 : 99;
+        final a = r.nextInt(maxFactor - 10) + 11;
+        final b = r.nextInt(maxFactor - 10) + 11;
         final answer = a * b;
-        return _n(r, 3, 'ضرب چندرقمی', '${_fa(a)} × ${_fa(b)} = ؟', answer, [answer + b, answer - a, (a + b) * 2], 'عدد دورقمی را در عدد یک‌رقمی ضرب می‌کنیم.');
+        return _n(r, 3, 'ضرب دورقمی', '${_fa(a)} × ${_fa(b)} = ؟', answer, [answer + b, answer - b, (a + 1) * b], 'دو عدد دورقمی را در هم ضرب می‌کنیم.');
       case 1:
         final a = (r.nextInt(8) + 2) * 10 + r.nextInt(9);
         final b = (r.nextInt(7) + 2) * 10 + r.nextInt(9);
@@ -164,8 +165,12 @@ class QuestionEngine {
   }
 
   static MathQuestion _chapter6(Random r) {
-    switch (r.nextInt(4)) {
+    switch (r.nextInt(5)) {
       case 0:
+        final a = r.nextInt(12) + 4;
+        final b = r.nextInt(8) + 3;
+        return _n(r, 6, 'محیط مستطیل', 'طول مستطیل ${_fa(a)} و عرض آن ${_fa(b)} سانتی‌متر است. محیط چقدر است؟', 2 * (a + b), [a * b, 2 * (a + b) + a, 2 * (a + b) - b], 'محیط مستطیل از جمع چهار ضلع، یعنی دو برابر مجموع طول و عرض، به دست می‌آید.', ' سانتی‌متر');
+      case 1:
         final a = r.nextInt(12) + 4;
         final b = r.nextInt(8) + 3;
         return _n(r, 6, 'مساحت مستطیل', 'طول مستطیل ${_fa(a)} و عرض آن ${_fa(b)} سانتی‌متر است. مساحت چقدر است؟', a * b, [2 * (a + b), a * b + a, a * b - b], 'مساحت مستطیل برابر طول ضربدر عرض است.', ' سانتی‌متر مربع');
@@ -178,9 +183,9 @@ class QuestionEngine {
         final height = r.nextInt(8) + 2;
         final area = base * height ~/ 2;
         return _n(r, 6, 'مساحت مثلث', 'قاعده مثلث ${_fa(base)} و ارتفاع آن ${_fa(height)} سانتی‌متر است. مساحت چقدر است؟', area, [base * height, area + base, area + height], 'مساحت مثلث نصف حاصل‌ضرب قاعده در ارتفاع است.', ' سانتی‌متر مربع');
-      default:
+      case 4:
         final parallel = r.nextBool();
-        return _q(r, 6, 'خط‌های موازی و عمود', parallel ? 'دو خط که یکدیگر را قطع نمی‌کنند و فاصله‌شان ثابت است چه نام دارند؟' : 'دو خط که با زاویه ۹۰ درجه همدیگر را قطع می‌کنند چه نام دارند؟', parallel ? 'موازی' : 'عمود', parallel ? ['عمود', 'منحنی', 'متقاطع'] : ['موازی', 'منحنی', 'هم‌جهت'], parallel ? 'خط‌های موازی همدیگر را قطع نمی‌کنند.' : 'خطوط عمود زاویه قائمه می‌سازند.');
+        return _q(r, 6, 'ویژگی چهارضلعی‌ها و خط‌ها', parallel ? 'کدام دو شکل چهار زاویه قائمه دارند؟' : 'دو خط که با زاویه ۹۰ درجه یکدیگر را قطع می‌کنند چه نام دارند؟', parallel ? 'مربع و مستطیل' : 'عمود', parallel ? ['لوزی و ذوزنقه', 'مثلث و مربع', 'دایره و مستطیل'] : ['موازی', 'منحنی', 'هم‌جهت'], parallel ? 'مربع و مستطیل هر دو چهار زاویه قائمه دارند.' : 'خطوط عمود زاویه قائمه می‌سازند.');
     }
   }
 
