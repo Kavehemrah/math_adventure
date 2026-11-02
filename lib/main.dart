@@ -805,8 +805,9 @@ class _GameScreenState extends State<GameScreen> {
             ],
           ),
         ),
-        SizedBox(height: compact ? 12 : 18),
-        Container(
+        if (selectedChapter == null) ...[
+          SizedBox(height: compact ? 12 : 18),
+          Container(
           padding: EdgeInsets.all(compact ? 15 : 22),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -844,7 +845,10 @@ class _GameScreenState extends State<GameScreen> {
                 ),
               ),
               SizedBox(height: compact ? 18 : 26),
-              Container(
+          ),
+        ],
+        if (selectedChapter != null) SizedBox(height: compact ? 12 : 18),
+        Container(
                 width: 70,
                 height: 70,
                 decoration: BoxDecoration(
