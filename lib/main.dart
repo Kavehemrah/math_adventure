@@ -1047,7 +1047,7 @@ class _GameScreenState extends State<GameScreen> {
             width: double.infinity,
             height: 56,
             child: ElevatedButton.icon(
-              onPressed: startGame,
+              onPressed: () => startGame(chapter: selectedChapter),
               icon: const Icon(Icons.replay_rounded),
               label: const Text('بازی دوباره', style: TextStyle(fontSize: 19)),
               style: primaryButtonStyle(),
