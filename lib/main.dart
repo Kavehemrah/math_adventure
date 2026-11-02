@@ -384,6 +384,24 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
+  void backFromPractice() {
+    if (selectedChapter == 2 && selectedTopic != null) {
+      timer?.cancel();
+      setState(() {
+        gameStarted = false;
+        showMap = false;
+        showChapterMenu = false;
+        showTopicMenu = true;
+        selectedChapter = null;
+        selectedTopic = null;
+        currentQuestion = null;
+        gameOver = false;
+      });
+      return;
+    }
+    goHome();
+  }
+
   @override
   void dispose() {
     timer?.cancel();
@@ -782,6 +800,13 @@ class _GameScreenState extends State<GameScreen> {
                               color: Color(0xFF665A83),
                             ),
                           ),
+                          const Text(
+                            'درست',
+                            style: TextStyle(
+                              fontSize: 8,
+                              color: Color(0xFF8A819D),
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -976,8 +1001,10 @@ class _GameScreenState extends State<GameScreen> {
               Row(
                 children: [
                   IconButton(
-                    onPressed: goHome,
-                    tooltip: 'بازگشت به خانه',
+                    onPressed: backFromPractice,
+                    tooltip: selectedChapter == 2
+                        ? 'بازگشت به مباحث فصل کسر'
+                        : 'بازگشت به خانه',
                     icon: const Icon(Icons.close_rounded, color: Colors.white),
                     style: IconButton.styleFrom(backgroundColor: Colors.white.withValues(alpha: 0.14)),
                   ),
@@ -1141,52 +1168,70 @@ class _GameScreenState extends State<GameScreen> {
               SizedBox(height: compact ? 16 : 22),
               if (currentQuestion?.fractionNumberLine == null)
                 GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: compact ? 2.0 : 1.9,
-                children: options.map((option) {
-                  final isCorrect = answered && option == correctAnswer;
-                  final isWrong = answered && option == selectedAnswer && option != correctAnswer;
-                  final background = isCorrect
-                      ? const Color(0xFFD8F7E3)
-                      : isWrong
-                          ? const Color(0xFFFFE0E3)
-                          : const Color(0xFFF1EDFF);
-                  final foreground = isCorrect
-                      ? const Color(0xFF176B3A)
-                      : isWrong
-                          ? const Color(0xFFB42332)
-                          : const Color(0xFF39246B);
-                  return ElevatedButton(
-                    onPressed: answered ? null : () => answerQuestion(option),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: background,
-                      disabledBackgroundColor: background,
-                      foregroundColor: foreground,
-                      disabledForegroundColor: foreground,
-                      elevation: 0,
-                      padding: const EdgeInsets.all(8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                        side: BorderSide(
-                          color: isCorrect ? const Color(0xFF65C98A) : isWrong ? const Color(0xFFEF8A95) : const Color(0xFFE1D7FF),
+                  crossAxisCount: 2,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: compact ? 2.0 : 1.9,
+                  children: options.map((option) {
+                    final isCorrect = answered && option == correctAnswer;
+                    final isWrong =
+                        answered && option == selectedAnswer && option != correctAnswer;
+                    final background = isCorrect
+                        ? const Color(0xFFD8F7E3)
+                        : isWrong
+                            ? const Color(0xFFFFE0E3)
+                            : const Color(0xFFF1EDFF);
+                    final foreground = isCorrect
+                        ? const Color(0xFF176B3A)
+                        : isWrong
+                            ? const Color(0xFFB42332)
+                            : const Color(0xFF39246B);
+                    return ElevatedButton(
+                      onPressed: answered ? null : () => answerQuestion(option),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: background,
+                        disabledBackgroundColor: background,
+                        foregroundColor: foreground,
+                        disabledForegroundColor: foreground,
+                        elevation: 0,
+                        padding: const EdgeInsets.all(8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          side: BorderSide(
+                            color: isCorrect
+                                ? const Color(0xFF65C98A)
+                                : isWrong
+                                    ? const Color(0xFFEF8A95)
+                                    : const Color(0xFFE1D7FF),
+                          ),
                         ),
                       ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (isCorrect) ...[const Icon(Icons.check_circle_rounded, size: 19), const SizedBox(width: 5)]
-                        else if (isWrong) ...[const Icon(Icons.cancel_rounded, size: 19), const SizedBox(width: 5)],
-                        Flexible(child: Text(fa(option), style: TextStyle(fontSize: compact ? 24 : 27, fontWeight: FontWeight.w900))),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (isCorrect) ...[
+                            const Icon(Icons.check_circle_rounded, size: 19),
+                            const SizedBox(width: 5),
+                          ] else if (isWrong) ...[
+                            const Icon(Icons.cancel_rounded, size: 19),
+                            const SizedBox(width: 5),
+                          ],
+                          Flexible(
+                            child: Text(
+                              fa(option),
+                              style: TextStyle(
+                                fontSize: compact ? 24 : 27,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
               if (answered) ...[
                 const SizedBox(height: 14),
                 Container(
