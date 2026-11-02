@@ -55,7 +55,7 @@ void main() {
         );
         expect(question.topic, 'شناخت کسر');
         expect(question.fractionVisual, isNotNull);
-        expect(question.prompt, isNot(contains(r'\${')));
+        expect(question.prompt, isNot(contains(r'${')));
         expect(question.prompt, contains('قسمت مساوی'));
       }
     });
