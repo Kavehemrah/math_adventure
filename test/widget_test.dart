@@ -22,4 +22,15 @@ void main() {
     expect(find.text('تمرین فصل ۱'), findsOneWidget);
     expect(find.text('جواب درست را انتخاب کن'), findsOneWidget);
   });
+
+  testWidgets('original adventure mode still starts independently', (tester) async {
+    await tester.pumpWidget(const MathAdventureApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('شروع بازی'));
+    await tester.pump();
+
+    expect(find.text('ماجراجویی ریاضی'), findsOneWidget);
+    expect(find.textContaining('از ۳۰'), findsOneWidget);
+  });
 }
