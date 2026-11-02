@@ -99,6 +99,27 @@ void main() {
       }
     });
 
+
+    test('chapter two includes contextual problems with valid answer choices', () {
+      final found = <String>{};
+      for (var seed = 0; seed < 100; seed++) {
+        for (final topic in ['addition', 'subtraction', 'multiplication']) {
+          final question = QuestionEngine.generate(
+            chapter: 2,
+            topic: topic,
+            random: Random(seed),
+          );
+          expect(question.options, hasLength(4));
+          expect(question.options.toSet(), hasLength(4));
+          expect(question.options, contains(question.answer));
+          if (question.prompt.contains('کیک')) found.add('addition');
+          if (question.prompt.contains('بریده‌ایم')) found.add('subtraction');
+          if (question.prompt.contains('بسته')) found.add('multiplication');
+        }
+      }
+      expect(found, containsAll(['addition', 'subtraction', 'multiplication']));
+    });
+
     test('number line questions expose valid touch targets and matching fractions', () {
       for (var seed = 0; seed < 80; seed++) {
         final question = QuestionEngine.generate(
