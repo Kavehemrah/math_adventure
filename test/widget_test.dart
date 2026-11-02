@@ -60,7 +60,11 @@ void main() {
 
     expect(find.text('سؤال بعدی'), findsOneWidget);
 
-    final backToTopics = find.byTooltip('بازگشت به مباحث فصل کسر');
+    final backToTopics = find.byKey(
+      const ValueKey('practice-back-button'),
+    );
+    await tester.ensureVisible(backToTopics);
+    await tester.pumpAndSettle();
     await tester.tap(backToTopics);
     await tester.pumpAndSettle();
     expect(find.text('تمرین فصل دوم: کسر'), findsOneWidget);
