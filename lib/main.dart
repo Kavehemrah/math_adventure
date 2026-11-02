@@ -785,7 +785,7 @@ class _GameScreenState extends State<GameScreen> {
                     style: IconButton.styleFrom(backgroundColor: Colors.white.withValues(alpha: 0.14)),
                   ),
                   const Spacer(),
-                  const Text('ماجراجویی ریاضی', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+                  Text(selectedChapter == null ? 'ماجراجویی ریاضی' : 'تمرین فصل ${fa('$selectedChapter')}', style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
                   const Spacer(),
                   const Icon(Icons.auto_awesome_rounded, color: Colors.amberAccent),
                 ],
@@ -795,7 +795,7 @@ class _GameScreenState extends State<GameScreen> {
                 children: [
                   Expanded(child: _gameStat(icon: Icons.stars_rounded, label: 'امتیاز', value: fa('$score'))),
                   const SizedBox(width: 8),
-                  Expanded(child: _gameStat(icon: Icons.flag_rounded, label: 'مرحله', value: '${fa('$level')} از ۳۰')),
+                  Expanded(child: _gameStat(icon: Icons.flag_rounded, label: selectedChapter == null ? 'مرحله' : 'پاسخ درست', value: selectedChapter == null ? '${fa('$level')} از ۳۰' : fa('$questionInLevel'))),
                   const SizedBox(width: 8),
                   Expanded(child: _gameStat(icon: Icons.favorite_rounded, label: 'جان', value: '❤️' * lives)),
                 ],
@@ -854,6 +854,10 @@ class _GameScreenState extends State<GameScreen> {
               ),
               const SizedBox(height: 10),
               const Text('جواب درست را انتخاب کن', style: TextStyle(fontSize: 14, color: Colors.black54, fontWeight: FontWeight.w600)),
+              if (currentQuestion != null) ...[
+                const SizedBox(height: 4),
+                Text(currentQuestion!.topic, style: const TextStyle(fontSize: 13, color: Color(0xFF6846D8), fontWeight: FontWeight.w800)),
+              ],
               SizedBox(height: compact ? 8 : 14),
               Directionality(
                 textDirection: TextDirection.ltr,
@@ -868,7 +872,7 @@ class _GameScreenState extends State<GameScreen> {
                   child: Text(
                     question,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: compact ? 32 : 38, fontWeight: FontWeight.w900, color: const Color(0xFF39246B)),
+                    style: TextStyle(fontSize: compact ? (question.length > 90 ? 18 : question.length > 55 ? 23 : 32) : (question.length > 90 ? 21 : question.length > 55 ? 29 : 38), fontWeight: FontWeight.w900, color: const Color(0xFF39246B)),
                   ),
                 ),
               ),
@@ -939,6 +943,10 @@ class _GameScreenState extends State<GameScreen> {
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: selectedAnswer == correctAnswer ? const Color(0xFF176B3A) : const Color(0xFFB42332)),
                   ),
                 ),
+                if (currentQuestion != null) ...[
+                  const SizedBox(height: 8),
+                  Text(currentQuestion!.explanation, textAlign: TextAlign.center, style: const TextStyle(fontSize: 13, color: Color(0xFF665A83), height: 1.5)),
+                ],
                 if (!gameOver) ...[
                   const SizedBox(height: 12),
                   SizedBox(
@@ -963,7 +971,9 @@ class _GameScreenState extends State<GameScreen> {
             const SizedBox(width: 6),
             Expanded(
               child: Text(
-                'پاسخ‌های درست این مرحله: ${fa('$questionInLevel')} از ۵',
+                selectedChapter == null
+                    ? 'پاسخ‌های درست این مرحله: ${fa('$questionInLevel')} از ۵'
+                    : 'پاسخ‌های درست در تمرین: ${fa('$questionInLevel')}',
                 style: const TextStyle(fontSize: 13, color: Color(0xFF665A83), fontWeight: FontWeight.w600),
               ),
             ),
