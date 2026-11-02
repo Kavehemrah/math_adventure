@@ -190,6 +190,8 @@ class QuestionEngine {
       case 4:
         final parallel = r.nextBool();
         return _q(r, 6, 'ویژگی چهارضلعی‌ها و خط‌ها', parallel ? 'کدام دو شکل چهار زاویه قائمه دارند؟' : 'دو خط که با زاویه ۹۰ درجه یکدیگر را قطع می‌کنند چه نام دارند؟', parallel ? 'مربع و مستطیل' : 'عمود', parallel ? ['لوزی و ذوزنقه', 'مثلث و مربع', 'دایره و مستطیل'] : ['موازی', 'منحنی', 'هم‌جهت'], parallel ? 'مربع و مستطیل هر دو چهار زاویه قائمه دارند.' : 'خطوط عمود زاویه قائمه می‌سازند.');
+      default:
+        throw StateError('Unexpected geometry question type');
     }
   }
 
