@@ -1,9 +1,29 @@
 import 'dart:math';
 
+enum FractionVisualStyle { bar, grid, circle }
+
 class FractionVisual {
-  const FractionVisual({required this.parts, required this.filled});
+  const FractionVisual({
+    required this.parts,
+    required this.filled,
+    this.style = FractionVisualStyle.bar,
+  });
+
   final int parts;
   final int filled;
+  final FractionVisualStyle style;
+}
+
+class FractionNumberLineVisual {
+  const FractionNumberLineVisual({
+    required this.divisions,
+    required this.numerator,
+    required this.tickValues,
+  });
+
+  final int divisions;
+  final int numerator;
+  final List<String> tickValues;
 }
 
 class MathQuestion {
@@ -15,6 +35,7 @@ class MathQuestion {
     required this.topic,
     required this.explanation,
     this.fractionVisual,
+    this.fractionNumberLine,
   });
 
   final String prompt;
@@ -24,18 +45,24 @@ class MathQuestion {
   final String topic;
   final String explanation;
   final FractionVisual? fractionVisual;
+  final FractionNumberLineVisual? fractionNumberLine;
 }
 
 class QuestionEngine {
   QuestionEngine._();
 
-  static MathQuestion generate({int? chapter, int level = 1, Random? random}) {
+  static MathQuestion generate({
+    int? chapter,
+    int level = 1,
+    String? topic,
+    Random? random,
+  }) {
     final r = random ?? Random();
     final c = chapter ?? r.nextInt(7) + 1;
     if (c < 1 || c > 7) throw ArgumentError.value(c, 'chapter');
     switch (c) {
       case 1: return _chapter1(r);
-      case 2: return _chapter2(r, level);
+      case 2: return _chapter2(r, level, topic);
       case 3: return _chapter3(r, level);
       case 4: return _chapter4(r);
       case 5: return _chapter5(r);
@@ -73,30 +100,188 @@ class QuestionEngine {
     }
   }
 
-  static MathQuestion _chapter2(Random r, int level) {
-    // Start with fraction meaning, then equivalence, then operations.
-    final stage = level <= 3 ? 0 : level <= 6 ? 1 : level <= 10 ? 2 : 3;
-    final type = stage == 0 ? 0 : stage == 1 ? 1 : stage == 2 ? 2 : r.nextInt(4);
-    switch (type) {
-      case 0:
+  static MathQuestion _chapter2(Random r, int level, String? selectedTopic) {
+    // Without a selected topic, keep the original gradual chapter progression.
+    final topic = selectedTopic ?? (level <= 3
+        ? 'recognition'
+        : level <= 6
+            ? 'equivalent'
+            : level <= 10
+                ? 'addition'
+                : [
+                    'recognition',
+                    'number_line',
+                    'equivalent',
+                    'comparison',
+                    'addition',
+                    'subtraction',
+                    'multiplication',
+                  ][r.nextInt(7)]);
+
+    switch (topic) {
+      case 'recognition': {
         final denominator = [2, 3, 4, 5, 6, 8][r.nextInt(6)];
         final numerator = r.nextInt(denominator - 1) + 1;
-        return _q(r, 2, 'شناخت کسر', 'یک واحد به ${_fa(denominator)} قسمت مساوی تقسیم شده و ${_fa(numerator)} قسمت رنگی است. کسر رنگی کدام است؟', _f(numerator, denominator), [_f(numerator + 1, denominator), _f(numerator, denominator + 1), _f(denominator - numerator, denominator)], 'صورت تعداد قسمت‌های رنگی و مخرج تعداد کل قسمت‌های مساوی است.', fractionVisual: FractionVisual(parts: denominator, filled: numerator));
-      case 1:
+        final styles = FractionVisualStyle.values;
+        final style = styles[r.nextInt(styles.length)];
+        final shapeName = switch (style) {
+          FractionVisualStyle.bar => 'نوار',
+          FractionVisualStyle.grid => 'شبکه',
+          FractionVisualStyle.circle => 'دایره',
+        };
+        return _q(
+          r,
+          2,
+          'شناخت کسر',
+          'در شکل $shapeName، یک واحد به ${_fa(denominator)} قسمت مساوی تقسیم شده و ${_fa(numerator)} قسمت رنگی است. کسر رنگی کدام است؟',
+          _f(numerator, denominator),
+          [
+            _f(numerator + 1, denominator),
+            _f(numerator, denominator + 1),
+            _f(denominator - numerator, denominator),
+          ],
+          'صورت، تعداد قسمت‌های رنگی و مخرج، تعداد کل قسمت‌های مساوی را نشان می‌دهد.',
+          fractionVisual: FractionVisual(
+            parts: denominator,
+            filled: numerator,
+            style: style,
+          ),
+        );
+      }
+      case 'numerator_denominator': {
+        final denominator = [2, 3, 4, 5, 6, 8][r.nextInt(6)];
+        final numerator = r.nextInt(denominator - 1) + 1;
+        final askNumerator = r.nextBool();
+        final answer = askNumerator ? numerator : denominator;
+        final wrong = askNumerator
+            ? [denominator, numerator + 1, max(1, numerator - 1)]
+            : [numerator, denominator + 1, max(2, denominator - 1)];
+        return _n(
+          r,
+          2,
+          'صورت و مخرج',
+          'در کسر ${_fa(numerator)}/${_fa(denominator)}، ${askNumerator ? 'صورت' : 'مخرج'} کدام عدد است؟',
+          answer,
+          wrong,
+          askNumerator
+              ? 'عدد بالای خط کسر، صورت نام دارد.'
+              : 'عدد پایین خط کسر، مخرج نام دارد.',
+        );
+      }
+      case 'number_line': {
+        final denominator = [2, 3, 4, 5, 6, 8][r.nextInt(6)];
+        final numerator = r.nextInt(denominator - 1) + 1;
+        final tickValues = List<String>.unmodifiable(
+          List.generate(denominator + 1, (index) => _f(index, denominator)),
+        );
+        final wrong = tickValues.where((value) => value != _f(numerator, denominator)).toList();
+        return _q(
+          r,
+          2,
+          'کسر روی محور اعداد',
+          'نقطه‌ای را لمس کن که کسر ${_f(numerator, denominator)} را نشان می‌دهد.',
+          _f(numerator, denominator),
+          wrong.take(3).toList(),
+          'فاصلهٔ صفر تا یک را به ${_fa(denominator)} قسمت مساوی تقسیم می‌کنیم؛ نقطهٔ ${_fa(numerator)}ام همان کسر موردنظر است.',
+          fractionNumberLine: FractionNumberLineVisual(
+            divisions: denominator,
+            numerator: numerator,
+            tickValues: tickValues,
+          ),
+        );
+      }
+      case 'equivalent': {
         final denominator = [2, 3, 4, 5, 6, 8][r.nextInt(6)];
         final numerator = r.nextInt(denominator - 1) + 1;
         final factor = r.nextInt(4) + 2;
-        return _q(r, 2, 'کسرهای مساوی', 'کدام کسر با ${_f(numerator, denominator)} مساوی است؟', _f(numerator * factor, denominator * factor), [_f(numerator + 1, denominator + factor), _f(numerator * factor, denominator), _f(numerator, denominator * factor)], 'برای ساختن کسر مساوی، صورت و مخرج را در یک عدد یکسان ضرب می‌کنیم.');
-      case 2:
+        return _q(
+          r,
+          2,
+          'کسرهای مساوی',
+          'کدام کسر با ${_f(numerator, denominator)} مساوی است؟',
+          _f(numerator * factor, denominator * factor),
+          [
+            _f(numerator + 1, denominator + factor),
+            _f(numerator * factor, denominator),
+            _f(numerator, denominator * factor),
+          ],
+          'برای ساختن کسر مساوی، صورت و مخرج را در یک عدد یکسان ضرب می‌کنیم.',
+        );
+      }
+      case 'comparison': {
+        final denominator = [3, 4, 5, 6, 8, 10][r.nextInt(6)];
+        final a = r.nextInt(denominator - 1) + 1;
+        var b = r.nextInt(denominator - 1) + 1;
+        while (b == a) {
+          b = r.nextInt(denominator - 1) + 1;
+        }
+        final answer = a > b ? '>' : '<';
+        return _q(
+          r,
+          2,
+          'مقایسهٔ کسرها',
+          '${_f(a, denominator)}  ؟  ${_f(b, denominator)}\nعلامت مناسب را انتخاب کن.',
+          answer,
+          [answer == '>' ? '<' : '>', '=', '≠'],
+          'وقتی مخرج‌ها برابرند، کسری بزرگ‌تر است که صورت بزرگ‌تری داشته باشد.',
+        );
+      }
+      case 'addition': {
         final denominator = [4, 5, 6, 8, 10][r.nextInt(5)];
         final a = r.nextInt(denominator - 1) + 1;
         final b = r.nextInt(denominator - a) + 1;
-        return _q(r, 2, 'جمع کسرها', 'حاصل جمع کسرها چیست؟\n${_f(a, denominator)} + ${_f(b, denominator)}', _f(a + b, denominator), [_f(a + b + 1, denominator), _f(a + b, denominator + 1), _f(a, denominator)], 'وقتی مخرج‌ها برابرند، صورت‌ها را جمع می‌کنیم.');
-      default:
-        final denominator = [3, 4, 5, 6][r.nextInt(4)];
+        return _q(
+          r,
+          2,
+          'جمع کسرها',
+          'حاصل جمع کسرها چیست؟\n${_f(a, denominator)} + ${_f(b, denominator)}',
+          _f(a + b, denominator),
+          [
+            _f(a + b + 1, denominator),
+            _f(a + b, denominator + 1),
+            _f(a, denominator),
+          ],
+          'وقتی مخرج‌ها برابرند، صورت‌ها را جمع می‌کنیم و مخرج ثابت می‌ماند.',
+        );
+      }
+      case 'subtraction': {
+        final denominator = [3, 4, 5, 6, 8, 10][r.nextInt(6)];
+        final larger = r.nextInt(denominator - 1) + 1;
+        final smaller = r.nextInt(larger) ;
+        return _q(
+          r,
+          2,
+          'تفریق کسرها',
+          'حاصل تفریق کسرها چیست؟\n${_f(larger, denominator)} − ${_f(smaller, denominator)}',
+          _f(larger - smaller, denominator),
+          [
+            _f(larger + smaller, denominator),
+            _f(larger - smaller + 1, denominator),
+            _f(larger, denominator),
+          ],
+          'وقتی مخرج‌ها برابرند، صورت کوچک‌تر را از صورت بزرگ‌تر کم می‌کنیم.',
+        );
+      }
+      case 'multiplication': {
+        final denominator = [3, 4, 5, 6, 8][r.nextInt(5)];
         final numerator = r.nextInt(denominator - 1) + 1;
         final whole = r.nextInt(5) + 2;
-        return _q(r, 2, 'ضرب عدد در کسر', '${_fa(whole)} × ${_f(numerator, denominator)} = ؟', _f(whole * numerator, denominator), [_f(whole + numerator, denominator), _f(whole * numerator + 1, denominator), _f(whole * numerator, denominator + 1)], 'عدد صحیح را در صورت ضرب می‌کنیم و مخرج ثابت می‌ماند.');
+        return _q(
+          r,
+          2,
+          'ضرب عدد در کسر',
+          '${_fa(whole)} × ${_f(numerator, denominator)} = ؟',
+          _f(whole * numerator, denominator),
+          [
+            _f(whole + numerator, denominator),
+            _f(whole * numerator + 1, denominator),
+            _f(whole * numerator, denominator + 1),
+          ],
+          'عدد صحیح را در صورت ضرب می‌کنیم و مخرج ثابت می‌ماند.',
+        );
+      }
+      default:
+        throw ArgumentError.value(selectedTopic, 'topic', 'موضوع ناشناخته برای فصل کسر');
     }
   }
 
@@ -242,7 +427,10 @@ class QuestionEngine {
 
   static MathQuestion _q(Random r, int chapter, String topic, String prompt,
       String answer, List<String> wrong, String explanation,
-      {FractionVisual? fractionVisual}) {
+      {
+        FractionVisual? fractionVisual,
+        FractionNumberLineVisual? fractionNumberLine,
+      }) {
     final set = <String>{answer};
     for (final item in wrong) {
       if (item != answer && set.length < 4) set.add(item);
@@ -261,6 +449,7 @@ class QuestionEngine {
       topic: topic,
       explanation: explanation,
       fractionVisual: fractionVisual,
+      fractionNumberLine: fractionNumberLine,
     );
   }
 
