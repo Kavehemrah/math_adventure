@@ -153,9 +153,19 @@ class QuestionEngine {
         final numerator = r.nextInt(denominator - 1) + 1;
         final askNumerator = r.nextBool();
         final answer = askNumerator ? numerator : denominator;
-        final wrong = askNumerator
-            ? [denominator, numerator + 1, max(1, numerator - 1)]
-            : [numerator, denominator + 1, max(2, denominator - 1)];
+        final candidates = askNumerator
+            ? [denominator, numerator + 1, numerator - 1, numerator + 2]
+            : [numerator, denominator + 1, denominator - 1, denominator + 2];
+        final wrong = <int>{};
+        for (final candidate in candidates) {
+          if (candidate > 0 && candidate != answer) wrong.add(candidate);
+          if (wrong.length == 3) break;
+        }
+        var fallback = 1;
+        while (wrong.length < 3) {
+          if (fallback != answer) wrong.add(fallback);
+          fallback++;
+        }
         return _n(
           r,
           2,
