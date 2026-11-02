@@ -202,7 +202,7 @@ class QuestionEngine {
         final total = values.reduce((a, b) => a + b);
         final days = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه'];
         final rows = List.generate(4, (i) => '${days[i]} ${_fa(values[i])}').join('، ');
-        return _n(r, 7, 'خواندن نمودار', 'تعداد کتاب‌های خوانده‌شده:\n${rows}\nدر مجموع چند کتاب خوانده شده است؟', total, [total + 2, total > 2 ? total - 2 : total + 3, values.reduce((a, b) => a > b ? a : b)], 'مقدار چهار روز را با هم جمع می‌کنیم.', ' کتاب');
+        return _n(r, 7, 'خواندن نمودار', 'تعداد کتاب‌های خوانده‌شده:\n$rows\nدر مجموع چند کتاب خوانده شده است؟', total, [total + 2, total > 2 ? total - 2 : total + 3, values.reduce((a, b) => a > b ? a : b)], 'مقدار چهار روز را با هم جمع می‌کنیم.', ' کتاب');
       case 1:
         final days = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه'];
         final firstValue = r.nextInt(10) + 1;
@@ -211,7 +211,7 @@ class QuestionEngine {
         final answer = days[values.indexOf(maxValue)];
         final wrong = days.where((day) => day != answer).toList()..shuffle(r);
         final rows = List.generate(4, (i) => '${days[i]}: ${_fa(values[i])}').join('، ');
-        return _q(r, 7, 'بیشترین مقدار در نمودار', 'مقدارهای ثبت‌شده:\n${rows}\nبیشترین مقدار مربوط به کدام روز است؟', answer, wrong, 'بزرگ‌ترین عدد جدول را پیدا می‌کنیم.');
+        return _q(r, 7, 'بیشترین مقدار در نمودار', 'مقدارهای ثبت‌شده:\n$rows\nبیشترین مقدار مربوط به کدام روز است؟', answer, wrong, 'بزرگ‌ترین عدد جدول را پیدا می‌کنیم.');
       case 2:
         final total = r.nextInt(5) + 5;
         final red = r.nextInt(total - 1) + 1;
