@@ -110,7 +110,7 @@ class QuestionEngine {
         return _n(r, 3, 'تقسیم', '${_fa(dividend)} ÷ ${_fa(divisor)} = ؟', quotient, [quotient + 1, quotient - 1, quotient + divisor], 'چون ${_fa(quotient)} × ${_fa(divisor)} برابر ${_fa(dividend)} است، خارج‌قسمت همین عدد است.');
       default:
         final divisor = [2, 3, 5, 10][r.nextInt(4)];
-        final number = divisor == 2 ? r.nextInt(400) + 101 : divisor == 3 ? (r.nextInt(100) + 10) * 3 : divisor == 5 ? (r.nextInt(100) + 10) * 5 : (r.nextInt(90) + 10) * 10 + r.nextInt(9);
+        final number = r.nextInt(900) + 100;
         final divisible = number % divisor == 0;
         return _q(r, 3, 'بخش‌پذیری', 'آیا عدد ${_fa(number)} بر ${_fa(divisor)} بخش‌پذیر است؟', divisible ? 'بله' : 'خیر', [divisible ? 'خیر' : 'بله', 'همیشه', 'اطلاعات کافی نیست'], divisible ? 'تقسیم بدون باقیمانده انجام می‌شود.' : 'تقسیم دارای باقیمانده است.');
     }
@@ -152,8 +152,8 @@ class QuestionEngine {
       case 1:
         final whole = r.nextInt(5) + 1;
         final numerator = r.nextInt(3) + 1;
-        final decimalPart = numerator * 10 ~/ 4;
-        return _q(r, 5, 'عدد مخلوط', 'عدد مخلوط ${_fa(whole)} و ${_f(numerator, 4)} به صورت اعشاری کدام است؟', _decimal(whole * 10 + decimalPart), [_decimal(whole * 10 + numerator), _decimal(whole * 10 + 4), _decimal(whole * 10 - decimalPart)], 'کسر را به اعشار تبدیل می‌کنیم و به بخش صحیح می‌افزاییم.');
+        final decimalPart = numerator * 25;
+        return _q(r, 5, 'عدد مخلوط', 'عدد مخلوط ${_fa(whole)} و ${_f(numerator, 4)} به صورت اعشاری کدام است؟', _decimal2(whole * 100 + decimalPart), [_decimal2(whole * 100 + numerator * 10), _decimal2(whole * 100 + 4 * 10), _decimal2(whole * 100 - decimalPart)], 'کسر را به اعشار تبدیل می‌کنیم و به بخش صحیح می‌افزاییم.');
       default:
         final whole = r.nextInt(8) + 1;
         final tenths = r.nextInt(10);
@@ -194,7 +194,8 @@ class QuestionEngine {
         return _n(r, 7, 'خواندن نمودار', 'تعداد کتاب‌های خوانده‌شده:\n${rows}\nدر مجموع چند کتاب خوانده شده است؟', total, [total + 2, total > 2 ? total - 2 : total + 3, values.reduce((a, b) => a > b ? a : b)], 'مقدار چهار روز را با هم جمع می‌کنیم.', ' کتاب');
       case 1:
         final days = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه'];
-        final values = List<int>.generate(4, (_) => r.nextInt(15) + 1);
+        final firstValue = r.nextInt(10) + 1;
+        final values = [firstValue, firstValue + 1, firstValue + 2, firstValue + 3]..shuffle(r);
         final maxValue = values.reduce((a, b) => a > b ? a : b);
         final answer = days[values.indexOf(maxValue)];
         final wrong = days.where((day) => day != answer).toList()..shuffle(r);
@@ -241,10 +242,16 @@ class QuestionEngine {
 
   static String _f(int n, int d) {
     final gcd = n.gcd(d);
-    return '${_fa(n ~/ gcd)}/${_fa(d ~/ gcd)}';
+    final numerator = n ~/ gcd;
+    final denominator = d ~/ gcd;
+    return denominator == 1 ? _fa(numerator) : '${_fa(numerator)}/${_fa(denominator)}';
   }
 
-  static String _decimal(int value) => _decimal2(value * 10);
+  static String _decimal(int value) {
+    final whole = value ~/ 10;
+    final tenth = value % 10;
+    return '${_fa(whole)}٫${_fa(tenth)}';
+  }
   static String _decimal2(int value) {
     final whole = value ~/ 100;
     final rest = (value % 100).toString().padLeft(2, '0');
