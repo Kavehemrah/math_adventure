@@ -23,6 +23,42 @@ void main() {
     expect(find.text('جواب درست را انتخاب کن'), findsOneWidget);
   });
 
+  testWidgets('chapter two opens topic practice and accepts a number-line tap', (tester) async {
+    await tester.pumpWidget(const MathAdventureApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('تمرین فصل‌های ریاضی چهارم'));
+    await tester.pumpAndSettle();
+
+    final chapterTwo = find.text('فصل ۲: کسر');
+    await tester.ensureVisible(chapterTwo);
+    await tester.tap(chapterTwo);
+    await tester.pumpAndSettle();
+
+    expect(find.text('تمرین فصل دوم: کسر'), findsOneWidget);
+    expect(find.text('کسر روی محور اعداد'), findsOneWidget);
+
+    final numberLineTopic = find.text('کسر روی محور اعداد');
+    await tester.ensureVisible(numberLineTopic);
+    await tester.tap(numberLineTopic);
+    await tester.pumpAndSettle();
+
+    expect(find.text('کسر روی محور اعداد'), findsOneWidget);
+    final numberLine = find.byWidgetPredicate(
+      (widget) =>
+          widget is CustomPaint &&
+          widget.painter is FractionNumberLinePainter,
+    );
+    expect(numberLine, findsOneWidget);
+
+    await tester.ensureVisible(numberLine);
+    final rect = tester.getRect(numberLine);
+    await tester.tapAt(Offset(rect.left + rect.width / 2, rect.center.dy));
+    await tester.pumpAndSettle();
+
+    expect(find.text('سؤال بعدی'), findsOneWidget);
+  });
+
   testWidgets('original adventure mode still starts independently', (tester) async {
     await tester.pumpWidget(const MathAdventureApp());
     await tester.pumpAndSettle();
