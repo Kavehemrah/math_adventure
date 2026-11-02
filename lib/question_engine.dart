@@ -1,5 +1,11 @@
 import 'dart:math';
 
+class FractionVisual {
+  const FractionVisual({required this.parts, required this.filled});
+  final int parts;
+  final int filled;
+}
+
 class MathQuestion {
   const MathQuestion({
     required this.prompt,
@@ -8,6 +14,7 @@ class MathQuestion {
     required this.chapter,
     required this.topic,
     required this.explanation,
+    this.fractionVisual,
   });
 
   final String prompt;
@@ -16,6 +23,7 @@ class MathQuestion {
   final int chapter;
   final String topic;
   final String explanation;
+  final FractionVisual? fractionVisual;
 }
 
 class QuestionEngine {
@@ -73,7 +81,7 @@ class QuestionEngine {
       case 0:
         final denominator = [2, 3, 4, 5, 6, 8][r.nextInt(6)];
         final numerator = r.nextInt(denominator - 1) + 1;
-        return _q(r, 2, 'شناخت کسر', 'یک واحد به \${_fa(denominator)} قسمت مساوی تقسیم شده و \${_fa(numerator)} قسمت رنگی است. کسر رنگی کدام است؟', _f(numerator, denominator), [_f(numerator + 1, denominator), _f(numerator, denominator + 1), _f(denominator - numerator, denominator)], 'صورت تعداد قسمت‌های رنگی و مخرج تعداد کل قسمت‌های مساوی است.');
+        return _q(r, 2, 'شناخت کسر', 'یک واحد به ${_fa(denominator)} قسمت مساوی تقسیم شده و ${_fa(numerator)} قسمت رنگی است. کسر رنگی کدام است؟', _f(numerator, denominator), [_f(numerator + 1, denominator), _f(numerator, denominator + 1), _f(denominator - numerator, denominator)], 'صورت تعداد قسمت‌های رنگی و مخرج تعداد کل قسمت‌های مساوی است.', fractionVisual: FractionVisual(parts: denominator, filled: numerator));
       case 1:
         final denominator = [2, 3, 4, 5, 6, 8][r.nextInt(6)];
         final numerator = r.nextInt(denominator - 1) + 1;
@@ -233,7 +241,8 @@ class QuestionEngine {
   }
 
   static MathQuestion _q(Random r, int chapter, String topic, String prompt,
-      String answer, List<String> wrong, String explanation) {
+      String answer, List<String> wrong, String explanation,
+      {FractionVisual? fractionVisual}) {
     final set = <String>{answer};
     for (final item in wrong) {
       if (item != answer && set.length < 4) set.add(item);
@@ -251,6 +260,7 @@ class QuestionEngine {
       chapter: chapter,
       topic: topic,
       explanation: explanation,
+      fractionVisual: fractionVisual,
     );
   }
 
