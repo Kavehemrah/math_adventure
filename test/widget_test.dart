@@ -60,6 +60,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('سؤال بعدی'), findsOneWidget);
+
+    final backToTopics = find.byTooltip('بازگشت به مباحث فصل کسر');
+    await tester.tap(backToTopics);
+    await tester.pumpAndSettle();
+    expect(find.text('تمرین فصل دوم: کسر'), findsOneWidget);
   });
 
   testWidgets('original adventure mode still starts independently', (tester) async {
