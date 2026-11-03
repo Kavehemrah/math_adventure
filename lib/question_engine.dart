@@ -37,6 +37,7 @@ class MathQuestion {
     this.fractionVisual,
     this.fractionNumberLine,
     this.misconceptionCode,
+    this.optionFeedback = const {},
   });
 
   final String prompt;
@@ -48,6 +49,9 @@ class MathQuestion {
   final FractionVisual? fractionVisual;
   final FractionNumberLineVisual? fractionNumberLine;
   final String? misconceptionCode;
+
+  /// بازخورد مخصوص هر گزینهٔ غلط. کلید باید دقیقاً همان متن گزینه باشد.
+  final Map<String, String> optionFeedback;
 }
 
 class QuestionEngine {
@@ -250,6 +254,11 @@ class QuestionEngine {
             _f(a + b, denominator),
             [_f(a + b, denominator * 2), _f(a + b + 1, denominator), _f(a, denominator)],
             'هر دو کسر از یک کیک و با قسمت‌های هم‌اندازه‌اند؛ صورت‌ها را جمع می‌کنیم و مخرج ثابت می‌ماند.',
+            optionFeedback: {
+              _f(a + b, denominator * 2): 'مخرج‌ها را با هم جمع نکن. هر دو سهم از یک کیک با قسمت‌های هم‌اندازه‌اند؛ فقط صورت‌ها را جمع می‌کنیم و مخرج همان می‌ماند.',
+              _f(a + b + 1, denominator): 'یک واحد به صورت اضافه نکن. فقط سهم مریم و سارا را با هم جمع کن.',
+              _f(a, denominator): 'فقط سهم یکی از بچه‌ها را حساب کرده‌ای. باید سهم هر دو نفر را در جمع بیاوری.',
+            },
           );
         }
         final denominator = [4, 5, 6, 8, 10][r.nextInt(5)];
@@ -267,6 +276,11 @@ class QuestionEngine {
             _f(a, denominator),
           ],
           'وقتی مخرج‌ها برابرند، صورت‌ها را جمع می‌کنیم و مخرج ثابت می‌ماند.',
+          optionFeedback: {
+            _f(a + b + 1, denominator): 'صورت را یک واحد بیشتر نکن. فقط دو صورت را با هم جمع کن و مخرج را عوض نکن.',
+            _f(a + b, denominator + 1): 'مخرج را تغییر نده. وقتی مخرج‌ها برابرند، مخرج ثابت می‌ماند و فقط صورت‌ها جمع می‌شوند.',
+            _f(a, denominator): 'این فقط کسر اول است. باید صورت هر دو کسر را جمع کنی.',
+          },
         );
       }
       case 'subtraction': {
@@ -281,6 +295,11 @@ class QuestionEngine {
             _f(total - used, denominator),
             [_f(total + used, denominator), _f(total - used, denominator + 1), _f(used, denominator)],
             'مقدار بریده‌شده را از مقدار اولیه کم می‌کنیم؛ چون مخرج‌ها برابرند، فقط صورت‌ها کم می‌شوند.',
+            optionFeedback: {
+              _f(total + used, denominator): 'اینجا باید کم کنیم، نه جمع. مقدار بریده‌شده را از مقدار اول کم کن و مخرج را ثابت بگذار.',
+              _f(total - used, denominator + 1): 'مخرج را یک واحد بیشتر نکن. قسمت‌ها هم‌اندازه‌اند؛ فقط صورت‌ها را از هم کم می‌کنیم.',
+              _f(used, denominator): 'این همان مقدار بریده‌شده است، نه مقدار باقی‌مانده. باقی‌مانده از کم کردن به دست می‌آید.',
+            },
           );
         }
         final denominator = [3, 4, 5, 6, 8, 10][r.nextInt(6)];
@@ -298,6 +317,11 @@ class QuestionEngine {
             _f(larger, denominator),
           ],
           'وقتی مخرج‌ها برابرند، صورت کوچک‌تر را از صورت بزرگ‌تر کم می‌کنیم.',
+          optionFeedback: {
+            _f(larger + smaller, denominator): 'صورت‌ها را جمع نکن. در تفریق، صورت کوچک‌تر را از صورت بزرگ‌تر کم می‌کنیم.',
+            _f(larger - smaller + 1, denominator): 'حاصل صورت‌ها را یک واحد بیشتر نکن. فقط همان تفریق را انجام بده و مخرج ثابت بماند.',
+            _f(larger, denominator): 'کسر اول را بدون کم کردن نوشته‌ای. باید صورت دوم را هم از صورت اول کم کنی.',
+          },
         );
       }
       case 'multiplication': {
@@ -312,6 +336,11 @@ class QuestionEngine {
             _f(groups * numerator, denominator),
             [_f(groups + numerator, denominator), _f(groups * numerator, denominator + 1), _f(numerator, denominator)],
             'مقدار هر بسته را به تعداد بسته‌ها تکرار می‌کنیم؛ یعنی عدد صحیح را در صورت ضرب می‌کنیم و مخرج ثابت می‌ماند.',
+            optionFeedback: {
+              _f(groups + numerator, denominator): 'تعداد بسته‌ها را با صورت جمع نکن. عدد بسته‌ها را در صورت ضرب کن و مخرج همان بماند.',
+              _f(groups * numerator, denominator + 1): 'مخرج را تغییر نده. در ضرب عدد در کسر، مخرج ثابت می‌ماند.',
+              _f(numerator, denominator): 'این فقط مقدار یک بسته است. باید همان مقدار را به تعداد بسته‌ها حساب کنی.',
+            },
           );
         }
         final denominator = [3, 4, 5, 6, 8][r.nextInt(5)];
@@ -329,6 +358,11 @@ class QuestionEngine {
             _f(whole * numerator, denominator + 1),
           ],
           'عدد صحیح را در صورت ضرب می‌کنیم و مخرج ثابت می‌ماند.',
+          optionFeedback: {
+            _f(whole + numerator, denominator): 'عدد را با صورت جمع نکن. عدد صحیح را در صورت ضرب می‌کنیم.',
+            _f(whole * numerator + 1, denominator): 'حاصل ضرب صورت را یک واحد بیشتر نکن. عدد را در صورت ضرب کن و مخرج را ثابت بگذار.',
+            _f(whole * numerator, denominator + 1): 'مخرج را در این ضرب تغییر نده. فقط صورت در عدد صحیح ضرب می‌شود.',
+          },
         );
       }
       default:
@@ -481,6 +515,7 @@ class QuestionEngine {
       {
         FractionVisual? fractionVisual,
         FractionNumberLineVisual? fractionNumberLine,
+        Map<String, String> optionFeedback = const {},
       }) {
     final set = <String>{answer};
     for (final item in wrong) {
@@ -492,6 +527,14 @@ class QuestionEngine {
       fallback++;
     }
     final options = set.toList()..shuffle(r);
+    final feedback = <String, String>{};
+    for (final entry in optionFeedback.entries) {
+      if (entry.key != answer &&
+          options.contains(entry.key) &&
+          entry.value.trim().isNotEmpty) {
+        feedback[entry.key] = entry.value;
+      }
+    }
     return MathQuestion(
       prompt: prompt,
       answer: answer,
@@ -502,6 +545,7 @@ class QuestionEngine {
       fractionVisual: fractionVisual,
       fractionNumberLine: fractionNumberLine,
       misconceptionCode: _misconceptionFor(topic),
+      optionFeedback: Map.unmodifiable(feedback),
     );
   }
 

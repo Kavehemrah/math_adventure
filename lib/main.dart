@@ -20,6 +20,23 @@ String fa(String value) {
   return value;
 }
 
+/// توضیح بعد از پاسخ. بازخورد اختصاصی فقط برای گزینهٔ غلطِ پاسخ‌داده‌شده است،
+/// نه برای پاسخ درست، نه وقتی وقت تمام شده، و نه اگر آن گزینه بازخوردی نداشته باشد.
+@visibleForTesting
+String answerFeedbackText({
+  required MathQuestion question,
+  required String? selectedAnswer,
+  required bool timedOut,
+}) {
+  if (!timedOut &&
+      selectedAnswer != null &&
+      selectedAnswer != question.answer) {
+    final specific = question.optionFeedback[selectedAnswer];
+    if (specific != null && specific.isNotEmpty) return specific;
+  }
+  return question.explanation;
+}
+
 class MathAdventureApp extends StatelessWidget {
   const MathAdventureApp({super.key});
 
@@ -42,14 +59,17 @@ class MathAdventureApp extends StatelessWidget {
 }
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key});
+  const GameScreen({super.key, this.random});
+
+  /// در تست می‌توان منبع تصادفی را ثابت کرد تا همان سؤال دوباره ساخته شود.
+  final Random? random;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
 }
 
 class _GameScreenState extends State<GameScreen> {
-  final Random random = Random();
+  late final Random random = widget.random ?? Random();
 
   Timer? timer;
   int bestScore = 0;
@@ -1254,7 +1274,15 @@ class _GameScreenState extends State<GameScreen> {
                 ),
                 if (currentQuestion != null) ...[
                   const SizedBox(height: 8),
-                  Text(currentQuestion!.explanation, textAlign: TextAlign.center, style: const TextStyle(fontSize: 13, color: Color(0xFF665A83), height: 1.5)),
+                  Text(
+                    answerFeedbackText(
+                      question: currentQuestion!,
+                      selectedAnswer: selectedAnswer,
+                      timedOut: timedOut,
+                    ),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 13, color: Color(0xFF665A83), height: 1.5),
+                  ),
                 ],
                 if (!gameOver) ...[
                   const SizedBox(height: 12),

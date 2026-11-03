@@ -141,6 +141,42 @@ void main() {
       expect(found, containsAll(['addition', 'subtraction', 'multiplication']));
     });
 
+    test('fraction operations explain each shown wrong option', () {
+      const topics = ['addition', 'subtraction', 'multiplication'];
+      final sawStory = <String>{};
+      final sawDirect = <String>{};
+
+      for (final topic in topics) {
+        for (var seed = 0; seed < 80; seed++) {
+          final question = QuestionEngine.generate(
+            chapter: 2,
+            topic: topic,
+            random: Random(seed),
+          );
+          expect(question.optionFeedback, isNotEmpty);
+          expect(question.optionFeedback.keys, isNot(contains(question.answer)));
+          for (final entry in question.optionFeedback.entries) {
+            expect(question.options, contains(entry.key));
+            expect(entry.key, isNot(question.answer));
+            expect(entry.value.trim().length, greaterThan(15));
+            expect(entry.value, isNot(question.explanation));
+            expect(_feedbackMatchesOperation(topic, entry.value), isTrue);
+          }
+          final story = question.prompt.contains('کیک') ||
+              question.prompt.contains('بریده‌ایم') ||
+              question.prompt.contains('بسته');
+          if (story) {
+            sawStory.add(topic);
+          } else {
+            sawDirect.add(topic);
+          }
+        }
+      }
+
+      expect(sawStory, containsAll(topics));
+      expect(sawDirect, containsAll(topics));
+    });
+
     test('number line questions expose valid touch targets and matching fractions', () {
       for (var seed = 0; seed < 80; seed++) {
         final question = QuestionEngine.generate(
@@ -186,4 +222,26 @@ void main() {
       }
     });
   });
+}
+
+bool _feedbackMatchesOperation(String topic, String feedback) {
+  switch (topic) {
+    case 'addition':
+      return feedback.contains('جمع') ||
+          feedback.contains('صورت') ||
+          feedback.contains('مخرج') ||
+          feedback.contains('سهم');
+    case 'subtraction':
+      return feedback.contains('کم') ||
+          feedback.contains('تفریق') ||
+          feedback.contains('باقی') ||
+          feedback.contains('مخرج');
+    case 'multiplication':
+      return feedback.contains('ضرب') ||
+          feedback.contains('بسته') ||
+          feedback.contains('مخرج') ||
+          feedback.contains('صورت');
+    default:
+      return false;
+  }
 }
