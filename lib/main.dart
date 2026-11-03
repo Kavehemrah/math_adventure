@@ -99,6 +99,7 @@ class _GameScreenState extends State<GameScreen> {
   bool showTopicMenu = false;
   bool gameOver = false;
   bool timedOut = false;
+  bool isRemedialPractice = false;
 
   @override
   void initState() {
@@ -194,6 +195,7 @@ class _GameScreenState extends State<GameScreen> {
     timer?.cancel();
     setState(() {
       score = 0;
+      isRemedialPractice = false;
       level = startingLevel ?? 1;
       selectedChapter = chapter;
       selectedTopic = topic;
@@ -343,7 +345,9 @@ class _GameScreenState extends State<GameScreen> {
       selectedAnswer = value;
       timedOut = value == null;
 
-      if (value == correctAnswer) {
+      if (isRemedialPractice) {
+        // تمرین جبرانی آموزشی است و در امتیاز، جان یا پیشرفت ثبت نمی‌شود.
+      } else if (value == correctAnswer) {
         final int earned = 10 + max(0, timeLeft ~/ 5).toInt();
         score += earned;
         totalScore += earned;
@@ -381,6 +385,36 @@ class _GameScreenState extends State<GameScreen> {
     if (!mounted) return;
     setState(() {
       gameOver = true;
+    });
+  }
+
+  void startRemedialPractice() {
+    if (selectedChapter != 2 || selectedTopic == null || currentQuestion == null) {
+      return;
+    }
+    final previousPrompt = currentQuestion!.prompt;
+    MathQuestion replacement;
+    var attempts = 0;
+    do {
+      replacement = QuestionEngine.generate(
+        chapter: 2,
+        topic: selectedTopic,
+        level: level,
+        random: random,
+      );
+      attempts++;
+    } while (replacement.prompt == previousPrompt && attempts < 30);
+
+    if (replacement.prompt == previousPrompt) return;
+    setState(() {
+      isRemedialPractice = true;
+      currentQuestion = replacement;
+      question = replacement.prompt;
+      correctAnswer = replacement.answer;
+      options = replacement.options;
+      answered = false;
+      selectedAnswer = null;
+      timedOut = false;
     });
   }
 
@@ -1127,6 +1161,26 @@ class _GameScreenState extends State<GameScreen> {
               ),
               const SizedBox(height: 10),
               const Text('جواب درست را انتخاب کن', style: TextStyle(fontSize: 14, color: Colors.black54, fontWeight: FontWeight.w600)),
+              if (isRemedialPractice) ...[
+                const SizedBox(height: 6),
+                Container(
+                  key: const ValueKey('remedial-practice-banner'),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE8F8EE),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Text(
+                    'تمرین جبرانی • بدون امتیاز و کاهش جان',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFF176B3A),
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
               if (currentQuestion != null) ...[
                 const SizedBox(height: 4),
                 Text(currentQuestion!.topic, style: const TextStyle(fontSize: 13, color: Color(0xFF6846D8), fontWeight: FontWeight.w800)),
@@ -1282,6 +1336,27 @@ class _GameScreenState extends State<GameScreen> {
                     ),
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 13, color: Color(0xFF665A83), height: 1.5),
+                  ),
+                ],
+                if (!gameOver &&
+                    selectedChapter == 2 &&
+                    selectedTopic != null &&
+                    !isRemedialPractice &&
+                    selectedAnswer != null &&
+                    selectedAnswer != correctAnswer) ...[
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: OutlinedButton.icon(
+                      key: const ValueKey('remedial-practice-button'),
+                      onPressed: startRemedialPractice,
+                      icon: const Icon(Icons.psychology_alt_rounded),
+                      label: const Text(
+                        'تمرین بیشتر از همین مبحث',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ),
                 ],
                 if (!gameOver) ...[
