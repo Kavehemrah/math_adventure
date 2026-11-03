@@ -168,4 +168,49 @@ void main() {
     expect(find.text(preview.explanation), findsNothing);
     expect(find.textContaining('جواب درست'), findsWidgets);
   });
+
+  testWidgets('wrong fraction answer offers a distinct score-free remedial question', (tester) async {
+    const seed = 11;
+    final preview = QuestionEngine.generate(
+      chapter: 2,
+      topic: 'addition',
+      random: Random(seed),
+    );
+    final wrong = preview.optionFeedback.keys.first;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: GameScreen(random: Random(seed)),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('تمرین فصل‌های ریاضی چهارم'));
+    await tester.pumpAndSettle();
+    final chapterTwo = find.text('فصل ۲: کسر');
+    await tester.ensureVisible(chapterTwo);
+    await tester.tap(chapterTwo);
+    await tester.pumpAndSettle();
+    final additionTopic = find.text('جمع کسرها');
+    await tester.ensureVisible(additionTopic);
+    await tester.tap(additionTopic);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text(wrong));
+    await tester.pumpAndSettle();
+    final remedialButton = find.byKey(
+      const ValueKey('remedial-practice-button'),
+    );
+    await tester.ensureVisible(remedialButton);
+    await tester.tap(remedialButton);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('remedial-practice-banner')), findsOneWidget);
+    expect(find.text(preview.prompt), findsNothing);
+    expect(find.text('تمرین بیشتر از همین مبحث'), findsNothing);
+  });
+
 }
