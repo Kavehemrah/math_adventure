@@ -420,7 +420,11 @@ class _GameScreenState extends State<GameScreen> {
 
   void nextQuestion() {
     if (gameOver) return;
-    setState(createQuestion);
+    setState(() {
+      // Leaving a remedial question returns the session to normal practice.
+      isRemedialPractice = false;
+      createQuestion();
+    });
     if (selectedChapter == null) startTimer();
   }
 
