@@ -211,6 +211,11 @@ void main() {
     expect(find.byKey(const ValueKey('remedial-practice-banner')), findsOneWidget);
     expect(find.text(preview.prompt), findsNothing);
     expect(find.text('تمرین بیشتر از همین مبحث'), findsNothing);
+
+    // Moving on must leave remedial mode; subsequent questions are normal practice.
+    await tester.tap(find.text('سؤال بعدی'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('remedial-practice-banner')), findsNothing);
   });
 
 }
